@@ -225,7 +225,7 @@ function admin_index()
 }
 </pre>
 
-NOTA: Perceba que desta vez criamos o filtro ´filter1´ sem nenhum parâmetro. Isto as regras serão selecionadas na View.
+NOTA: Perceba que desta vez criamos o filtro ´filter1´ sem nenhum parâmetro. Isto porque as regras serão selecionadas na View.
 
 Arquivo __/app/view/users/admin_index.ctp__
 <pre>
