@@ -1,6 +1,6 @@
 # Filter Results
 
-Plugin que gera `conditions` para métodos `find` a partir de uma formulário de pesquisa para CakePHP.
+Plugin que gera `conditions` para métodos `find` no CakePHP a partir de um formulário de pesquisa.
 
 ## Compatibilidade
 
