@@ -69,9 +69,7 @@ function admin_index()
 {
     $this->User->recursive = 0;
 
-    $this->paginate['order'] = 'User.name ASC';
-    $this->paginate['limit'] = 10;
-
+    // Filter Results
     $this->FilterResults->addFilters(
         array(
             'filter1' => array(
@@ -83,6 +81,10 @@ function admin_index()
             )
         )
     );
+    
+    // Paginate
+    $this->paginate['order'] = 'User.name ASC';
+    $this->paginate['limit'] = 10;
     $this->paginate['conditions'] = $this->FilterResults->make();
 
     $this->set('users', $this->paginate());
@@ -167,9 +169,7 @@ function admin_index()
 {
     $this->User->recursive = 0;
 
-    $this->paginate['order'] = 'User.name ASC';
-    $this->paginate['limit'] = 10;
-
+    // Filter Results
     $this->FilterResults->addFilters(
         array(
             'filter1' => array(
@@ -186,6 +186,10 @@ function admin_index()
             )
         )
     );
+    
+    // Paginate
+    $this->paginate['order'] = 'User.name ASC';
+    $this->paginate['limit'] = 10;
     $this->paginate['conditions'] = $this->FilterResults->make();
 
     $this->set('users', $this->paginate());
@@ -215,10 +219,12 @@ function admin_index()
 {
     $this->User->recursive = 0;
 
+    // Filter Results
+    $this->FilterResults->addFilters(array('filter1'));
+    
+     // Paginate
     $this->paginate['order'] = 'User.name ASC';
     $this->paginate['limit'] = 10;
-
-    $this->FilterResults->addFilters(array('filter1'));
     $this->paginate['conditions'] = $this->FilterResults->make();
 
     $this->set('users', $this->paginate());
