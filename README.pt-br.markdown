@@ -289,8 +289,8 @@ array(
     '!=' => __('diferente de', true),
     '>'  => __('maior que', true),
     '>=' => __('maior ou igual', true),
-    '<'  => __('menor que', true),
-    '<=' => __('menor ou igual', true)
+    "<"  => __('menor que', true),
+    "<=" => __('menor ou igual', true)
 );
 </pre>
 
