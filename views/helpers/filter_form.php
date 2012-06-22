@@ -20,7 +20,7 @@
  * @use        AppHelper
  * @package    filter_results
  * @subpackage filter_results.filter_form
- * @link       http://www.github.com/pedroelsner/filter_results
+ * @link       http://www.github.com/pedroelsner/filter_results/tree/1.3
  */
 class FilterFormHelper extends AppHelper
 {

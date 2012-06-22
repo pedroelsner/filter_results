@@ -21,7 +21,7 @@
  * @use        Object
  * @package    filter_results
  * @subpackage filter_results.filter_results
- * @link       http://www.github.com/pedroelsner/filter_results
+ * @link       http://www.github.com/pedroelsner/filter_results/tree/1.3
  */
 class FilterResultsComponent extends Object
 {
