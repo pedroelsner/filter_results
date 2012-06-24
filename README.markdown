@@ -301,16 +301,16 @@ array(
 Now is possible too use the operator `BETWEEN` in FilterResults:
 
 <pre>
-    // Filter Results
-    $this->FilterResults->addFilters(
-        array(
-            'filter1' => array(
-                'User.id' => array(
-                    'operator'    => 'BETWEEN'
-                )
+// Filter Results
+$this->FilterResults->addFilters(
+    array(
+        'filter1' => array(
+            'User.id' => array(
+                'operator'    => 'BETWEEN'
             )
         )
-    );
+    )
+);
 </pre>
 
 # Copyright e License
