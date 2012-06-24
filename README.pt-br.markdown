@@ -1,10 +1,11 @@
 # Filter Results
 
-Plugin que gera `conditions` para métodos `find` no CakePHP a partir de um formulário de pesquisa.
+Plugin que gera `conditions` para métodos `find` no CakePHP 1.3 a partir de um formulário de pesquisa.
 
 ## Compatibilidade
 
-Compatível com CakePHP v 1.3 + Paginate (Component)
+Compatível com CakePHP 1.3 + Paginate (Component)
+* Versão para CakePHP 2.x: [http://github.com/pedroelsner/filter_results/](http://github.com/pedroelsner/filter_results/ "FilterResults para CakePHP 2.x")
 
 # Instalação
 
