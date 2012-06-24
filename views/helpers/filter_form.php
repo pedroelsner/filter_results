@@ -179,7 +179,16 @@ class FilterFormHelper extends AppHelper
         
         $settings['options'] = $this->_component->getFieldValues($name);
         
-        echo $this->Form->input(sprintf('%s.%s', $this->_component->getPrefix(), $name), $settings);    
+        if($this->_component->getOperation($name) == 'BETWEEN')
+        {
+            echo $this->Form->input(sprintf('%s.%s', $this->_component->getPrefix(), $name), $settings)
+               . " "
+               . $this->Form->input(sprintf('%s.%s2', $this->_component->getPrefix(), $name), $settings);
+        }
+        else
+        {
+            echo $this->Form->input(sprintf('%s.%s', $this->_component->getPrefix(), $name), $settings);
+        }
         
     }
     

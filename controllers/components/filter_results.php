@@ -765,14 +765,65 @@ class FilterResultsComponent extends Object
                             $value = $this->_params[sprintf('%s.%s', $this->_options['prefix'], $field)];
                         }
                         
-                        $beforeValue = (isset($options[$fieldModel]['beforeValue'])) ? $options[$fieldModel]['beforeValue'] : '';
-                        $afterValue = (isset($options[$fieldModel]['afterValue'])) ? $options[$fieldModel]['afterValue'] : '';
-                        
-                        $condition += array(
-                            sprintf('%s %s', $fieldModel, $operator) => sprintf('%s%s%s', $beforeValue, $value, $afterValue)
-                        );
-                        
-                        $this->controller->data[$this->_options['prefix']][$field] = $this->_params[sprintf('%s.%s', $this->_options['prefix'], $field)];
+
+
+                        if ($operator == 'BETWEEN')
+                        {
+                            // Verifica a existencia dos dois parâmetros
+                            if( !isset($this->_params[sprintf('%s.%s', $this->_options['prefix'], $field)]) || !isset($this->_params[sprintf('%s.%s2', $this->_options['prefix'], $field)]) )
+                            {
+                                
+                                if (isset($this->_params[sprintf('%s.%s', $this->_options['prefix'], $field)]))
+                                {
+                                    $this->controller->data[$this->_options['prefix']][$field] = $this->_params[sprintf('%s.%s', $this->_options['prefix'], $field)];
+                                }
+
+                                if (isset($this->_params[sprintf('%s.%s2', $this->_options['prefix'], $field)]))
+                                {
+                                    $this->controller->data[$this->_options['prefix']][$field.'2'] = $this->_params[sprintf('%s.%s2', $this->_options['prefix'], $field)];
+                                }
+
+                                $this->controller->Session->setFlash(__('Informe os dois valores do intervalo.', true), 'alert', array('class' => 'alert-error'));
+                                break;
+
+                            }
+                            else
+                            {
+                                $value2 = $this->_params[sprintf('%s.%s2', $this->_options['prefix'], $field)];
+                            }
+                            
+                            // Altera o formato da data para formato de banco
+                            if( isset($options[$fieldModel]['convertDate']) && $options[$fieldModel]['convertDate'] )
+                            {
+                                $value = implode(preg_match("~\/~", $value) == 0 ? "/" : "-", array_reverse(explode(preg_match("~\/~", $value) == 0 ? "-" : "/", $value)));
+                                $value2 = implode(preg_match("~\/~", $value2) == 0 ? "/" : "-", array_reverse(explode(preg_match("~\/~", $value2) == 0 ? "-" : "/", $value2)));
+                            }
+                            
+                            // Cria conditions de between em formato cake
+                            $value = array($value, $value2);
+                            $operator = 'BETWEEN ? AND ?';
+                            $condition += array(
+                                sprintf('%s %s', $fieldModel, $operator) => $value
+                            );
+                            
+                            // Deixa o form preenchido para os dois campos
+                            $this->controller->data[$this->_options['prefix']][$field] = $this->_params[sprintf('%s.%s', $this->_options['prefix'], $field)];
+                            $this->controller->data[$this->_options['prefix']][$field.'2'] = $this->_params[sprintf('%s.%s2', $this->_options['prefix'], $field)];
+                            
+                        }
+                        else
+                        {
+                            
+                            $beforeValue = (isset($options[$fieldModel]['beforeValue'])) ? $options[$fieldModel]['beforeValue'] : '';
+                            $afterValue = (isset($options[$fieldModel]['afterValue'])) ? $options[$fieldModel]['afterValue'] : '';
+
+                            $condition += array(
+                                sprintf('%s %s', $fieldModel, $operator) => sprintf('%s%s%s', $beforeValue, $value, $afterValue)
+                            );
+                            
+                            $this->controller->data[$this->_options['prefix']][$field] = $this->_params[sprintf('%s.%s', $this->_options['prefix'], $field)];
+                        }
+
                     }
                     break;
             }
@@ -806,6 +857,24 @@ class FilterResultsComponent extends Object
         }
         
         return $fields;
+    }
+
+
+/**
+ * FUNÇÃO CRIADA POR VINICIUS ARANTES (vinicius.big@gmail.com)
+ * @param type $name
+ * @return type 
+ */
+    function getOperation($name)
+    {
+        foreach ($this->_options['filters'][$name] as $key => $value)
+        {
+            if (isset($value['operator']))
+            {
+                return $value['operator'];
+            }
+        }
+        return '';
     }
     
 }

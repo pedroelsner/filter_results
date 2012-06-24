@@ -294,6 +294,41 @@ array(
 );
 </pre>
 
+# Operador BETWEEN
+
+## Por: Vinicius Arantes
+
+Agora também é possível utilizar o operador `BETWEEN` para consulta entre valores numéricos ou de data. Configure o campo de filtro desta forma:
+
+<pre>
+    // Filter Results
+    $this->FilterResults->addFilters(
+        array(
+            'filter1' => array(
+                'User.id' => array(
+                    'operator'    => 'BETWEEN'
+                )
+            )
+        )
+    );
+</pre>
+
+Para campos de data, adicione a opção `'convertDate' => true` para converte a data informada para o formato `YYYY-MM-DD`:
+
+<pre>
+    // Filter Results
+    $this->FilterResults->addFilters(
+        array(
+            'filter1' => array(
+                'User.modified' => array(
+                    'operator'    => 'BETWEEN',
+                    'convertDate' => true
+                )
+            )
+        )
+    );
+</pre>
+
 # Copyright e Licença
 
 Copyright 2011, Pedro Elsner (http://pedroelsner.com/)
