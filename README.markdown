@@ -1,19 +1,27 @@
 # Filter Results
 
-Generates `conditions` to `find` methods in CakePHP 1.3 from a search form.
+Generates `conditions` to `find` methods in CakePHP 2.x from a search form.
 
 ## Compatibility
 
-Compatible with CakePHP 1.3 + Paginate (Component)
-* Version for CakePHP 2.x: [http://github.com/pedroelsner/FilterResults2/](http://github.com/pedroelsner/FilterResults2/ "FilterResults para CakePHP 2.x")
+Compatible with CakePHP 2.x + Paginate (Component)
+* Version for CakePHP 1.3: [http://github.com/pedroelsner/filter_results/](http://github.com/pedroelsner/filter_results/ "FilterResults para CakePHP 1.3")
 
 # Installation
 
-Download the plugin and place its contents inside `/app/plugins/filter_results` or other directory plugins for CakePHP.
+Download the plugin and place its contents inside `/app/Plugin/FilterResults2` or other directory plugins for CakePHP.
+
+## Activation
+
+Activate the plugin by adding the file __/app/Config/bootstrap.php__:
+
+<pre>
+CakePlugin::load('FilterResults');
+</pre>
 
 ## Configuration
 
-Edit the file __/app/app_controller.php__:
+Edit the file __/app/AppController.php__:
 
 <pre>
 var $components = array(
@@ -62,11 +70,11 @@ CREATE TABLE users (
 
 # Simple Filter
 
-Well, after generating the screens at Bake or [Bake utf8] (http://www.github.com/pedroelsner/bake_utf8), we put a filter on the grid(table) to search a user by name(`User.name `). So let's set the Controller and View, as follows:
+Well, after generating the screens at Bake, we put a filter on the grid(table) to search a user by name(`User.name `). So let's set the Controller and View, as follows:
 
-File __/app/controller/users_controller.php__
+File __/app/Controller/UsersController.php__
 <pre>
-function admin_index()
+function index()
 {
     $this->User->recursive = 0;
 
@@ -96,7 +104,7 @@ The setting here is quite simple: We create a filter called `filter1` that will 
 
 Now we just have to make the form on View at the top of the table.
 
-File __/app/view/users/admin_index.ctp)__
+File __/app/View/Users/index.ctp)__
 <pre>
 $this->FilterForm->create($FilterResults);
 $this->FilterForm->input('filter1');
@@ -112,7 +120,7 @@ Let us now make another rule within the filter `filter1`. We want to filter it b
 
 Then just changed our Controller:
 
-File __/app/controller/users_controller.php__
+File __/app/Controller/UsersController.php__
 <pre>
 $this->FilterResults->addFilters(
     array(
@@ -142,7 +150,7 @@ NOTE: If you define more than one condition without the specific rule, the plugi
 
 Suppose now that our filter `filter1` when informed should filter by name (`User.name`) And only active users.
 
-File __/app/controller/users_controller.php__
+File __/app/Controller/UsersController.php__
 <pre>
 $this->FilterResults->addFilters(
     array(
@@ -164,9 +172,9 @@ $this->FilterResults->addFilters(
 
 Let's change our filter. In addition to filtering by name, we now also filter by user group(`Group.name`) through a desired selection field.
 
-File __/app/controller/users_controller.php__
+File __/app/Controller/UsersController.php__
 <pre>
-function admin_index()
+function index()
 {
     $this->User->recursive = 0;
 
@@ -197,7 +205,7 @@ function admin_index()
 }
 </pre>
 
-File __/app/view/users/admin_index.ctp__
+File __/app/View/Users/index.ctp__
 <pre>
 $this->FilterForm->create($FilterResults);
 $this->FilterForm->input('filter2', array('class' => 'select-box'));
@@ -214,9 +222,9 @@ To be clear, see this [image](http://pedroelsner.com/wp-content/uploads/2011/09/
 
 In some cases we want something different than, for example, we want the user to choose the field and the operator to perform the filter.
 
-File __/app/controller/users_controller.php__
+File __/app/Controller/UsersController.php__
 <pre>
-function admin_index()
+function index()
 {
     $this->User->recursive = 0;
 
@@ -234,7 +242,7 @@ function admin_index()
 
 NOTE: Note that this time we filter `filter1` without any parameters. This is because the rules are selected in the View.
 
-File __/app/view/users/admin_index.ctp__
+File __/app/View/Users/index.ctp__
 <pre>
 $this->FilterForm->create($FilterResults);
 $this->FilterForm->selectFields('filter1', null, array('class' => 'select-box'));
@@ -250,7 +258,7 @@ There will be situations where you need to customize the fields and operators fo
 
 For this, we change only the View.
 
-Arquivo __/app/view/users/admin_index.ctp__
+Arquivo __/app/View/Users/index.ctp__
 <pre>
 $this->FilterForm->create($FilterResults);
 $this->FilterForm->selectFields(
@@ -316,6 +324,6 @@ $this->FilterResults->addFilters(
 
 # Copyright e License
 
-Copyright 2011, Pedro Elsner (http://pedroelsner.com/)
+Copyright 2012, Pedro Elsner (http://pedroelsner.com/)
 
 Licensed under Creative Commons 3.0 (http://creativecommons.org/licenses/by/3.0/)

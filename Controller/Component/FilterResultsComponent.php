@@ -3,27 +3,27 @@
  * Componente que filtra resultados através de parâmetros enviado
  * por campos de formulário. Compatível com o componente 'Paginate'
  *
- * Compatível com PHP 4 e 5
+ * Compatível com PHP 5.2+
  *
  * Licenciado pela Creative Commons 3.0
  *
  * @filesource
- * @copyright  Copyright 2011, Pedro Elsner (http://pedroelsner.com/)
+ * @copyright  Copyright 2012, Pedro Elsner (http://pedroelsner.com/)
  * @author     Pedro Elsner <pedro.elsner@gmail.com>
  * @license    Creative Commons 3.0 (http://creativecommons.org/licenses/by/3.0/br/)
- * @since      v 1.0
+ * @since      v 2.0
  */
 
 
 /**
- * Filter Results
+ * Filter Results Component
  *
- * @use        Object
+ * @use        Component
  * @package    filter_results
  * @subpackage filter_results.filter_results
- * @link       http://www.github.com/pedroelsner/filter_results/
+ * @link       http://www.github.com/pedroelsner/FilterResults2
  */
-class FilterResultsComponent extends Object
+class FilterResultsComponent extends Component
 {
     
 /**
@@ -33,7 +33,7 @@ class FilterResultsComponent extends Object
  * @access public
  * @static
  */
-    static $instances = 0;
+    public static $instances = 0;
     
 /**
  * Idencificação da instância
@@ -83,9 +83,10 @@ class FilterResultsComponent extends Object
  *
  * @access public
  */
-    public function __construct()
+    public function __construct(ComponentCollection $collection, $settings = array())
     {
         $this->_instance = ++self::$instances;
+        $this->_options = array_merge($this->_options, $settings);
     }
     
     
@@ -111,14 +112,11 @@ class FilterResultsComponent extends Object
  * @param object $controller Passa por referencia o Controller
  * @param array $fields Passa as configurações dos campos para pesquisa
  * @access public
- * @link http://book.cakephp.org/pt/view/996/Criando-Componentes
  */
-    function initialize(&$controller, $settings = null)
+    public function initialize(Controller $controller)
     {
-        $this->controller =& $controller;
-        
-        // Faz uma cópia dos parametros do Controller
-        $this->params = $controller->params;
+        $this->controller = $controller;
+        $this->params = $controller->request;
     }
     
     
@@ -129,9 +127,8 @@ class FilterResultsComponent extends Object
  *
  * @param object $controller Passa por referencia o Controller
  * @access public
- * @link http://book.cakephp.org/pt/view/996/Criando-Componentes
  */
-    function startup(&$controller)
+    public function startup(Controller $controller)
     {
     
     }
@@ -144,9 +141,8 @@ class FilterResultsComponent extends Object
  *
  * @param object $controller Passa por referencia o Controller 
  * @access public
- * @link http://book.cakephp.org/pt/view/996/Criando-Componentes
  */
-    function beforeRender(&$controller)
+    public function beforeRender(Controller $controller)
     {
     
     }
@@ -159,9 +155,8 @@ class FilterResultsComponent extends Object
  *
  * @param object $controller Passa por referencia o Controller 
  * @access public
- * @link http://book.cakephp.org/pt/view/996/Criando-Componentes
  */
-    function shutdown(&$controller)
+    public function shutdown(Controller $controller)
     {
     
     }
@@ -177,9 +172,8 @@ class FilterResultsComponent extends Object
  * @param string $status
  * @param boolean $exit
  * @access public
- * @link http://book.cakephp.org/pt/view/996/Criando-Componentes
  */
-    function beforeRedirect(&$controller, $url, $status=null, $exit=true)
+    public function beforeRedirect(Controller $controller, $url, $status=null, $exit=true)
     {
     
     }
@@ -192,7 +186,7 @@ class FilterResultsComponent extends Object
  * @return string
  * @access protected
  */
-    function _encrypt($string)
+    protected function _encrypt($string)
     {
         if ( !(is_string($string)) )
         {
@@ -210,7 +204,7 @@ class FilterResultsComponent extends Object
  * @return string
  * @access protected
  */
-    function _decrypt($string)
+    protected function _decrypt($string)
     {
         if ( !(is_string($string)) )
         {
@@ -227,7 +221,7 @@ class FilterResultsComponent extends Object
  * @return string
  * @access public
  */
-    function getFormOptions()
+    public function getFormOptions()
     {
         return $this->_options['form'];
     }
@@ -239,7 +233,7 @@ class FilterResultsComponent extends Object
  * @return string
  * @access public
  */
-    function getFieldModel()
+    public function getFieldModel()
     {
         return $this->_options['fieldModel'];
     }
@@ -251,7 +245,7 @@ class FilterResultsComponent extends Object
  * @return string
  * @access public
  */
-    function getOperator()
+    public function getOperator()
     {
         return $this->_options['operator'];
     }
@@ -263,7 +257,7 @@ class FilterResultsComponent extends Object
  * @return string
  * @access public
  */
-    function getConditions()
+    public function getConditions()
     {
         return $this->_conditions;
     }
@@ -275,7 +269,7 @@ class FilterResultsComponent extends Object
  * @return string
  * @access public
  */
-    function getAutoPaginate()
+    public function getAutoPaginate()
     {
         return $this->_options['autoPaginate'];
     }
@@ -288,7 +282,7 @@ class FilterResultsComponent extends Object
  * @return boolean
  * @access public
  */
-    function setAutoPaginate($autoPaginate)
+    public function setAutoPaginate($autoPaginate)
     {
         
         if ( !(is_bool($autoPaginate)) )
@@ -309,7 +303,7 @@ class FilterResultsComponent extends Object
  * @return string
  * @access public
  */
-    function getPrefix()
+    public function getPrefix()
     {
         return $this->_options['prefix'];
     }
@@ -323,7 +317,7 @@ class FilterResultsComponent extends Object
  * @return string
  * @access public
  */
-    function setPrefix($prefix)
+    public function setPrefix($prefix)
     {
         if ( !(is_string($prefix)) )
         {
@@ -348,7 +342,7 @@ class FilterResultsComponent extends Object
  * @return boolean
  * @access public
  */
-    function hasField($field)
+    public function hasField($field)
     {
         if (isset($this->_options['filters'][$field]))
         {
@@ -379,7 +373,7 @@ class FilterResultsComponent extends Object
  * @return array
  * @access public
  */
-    function getFieldValues($field)
+    public function getFieldValues($field)
     {
         $values = array();
         
@@ -402,7 +396,7 @@ class FilterResultsComponent extends Object
  * @return array
  * @access public
  */
-    function _foreachFieldForValues($array)
+    public function _foreachFieldForValues($array)
     {
         $result = array();
         
@@ -435,7 +429,7 @@ class FilterResultsComponent extends Object
  * @return boolean
  * @access public
  */
-    function setFilters($filters = null)
+    public function setFilters($filters = null)
     {
         
         if ( !(is_array($filters)) )
@@ -458,7 +452,7 @@ class FilterResultsComponent extends Object
  * @return boolean
  * @access public
  */
-    function merge($default, $options)
+    public function merge($default, $options)
     {
         $return = array('' => $default);
         $return[] = $options;
@@ -475,7 +469,7 @@ class FilterResultsComponent extends Object
  * @return boolean
  * @access public
  */
-    function addFilters($filters = null)
+    public function addFilters($filters = null)
     {
         
         if ( !(is_array($filters)) )
@@ -501,21 +495,22 @@ class FilterResultsComponent extends Object
  *
  * Gera o array 'conditions' para o componente 'Paginator' do Controller
  *
- * @access protected
+ * @access public
  */
-    function make()
+    public function make()
     {
         
         /**
          * Verifica parâmetros enviados via POST
          */
-        if (isset($this->controller->data[$this->_options['prefix']]))
+        if (isset($this->params->data[$this->_options['prefix']]))
         {
             /**
-            * Monta a url com elementos enviados pelo formulário,
-            * onde o resultador será algo parecido como:
-            * example.com/cake/posts/index/Search.keywords:mykeyword/Search.tag_id:3
-            */
+             * Monta a url com elementos enviados pelo formulário,
+             * onde o resultador será algo parecido como:
+             * example.com/cake/posts/index/Search.keywords:mykeyword/Search.tag_id:3
+             */
+
             $url = array();
             $get = array();
             
@@ -533,7 +528,7 @@ class FilterResultsComponent extends Object
             }
             
             
-            foreach ($this->controller->data[$this->_options['prefix']] as $key => $value)
+            foreach ($this->params->data[$this->_options['prefix']] as $key => $value)
             {
                 if ( !(is_array($value)) )
                 {
@@ -600,7 +595,7 @@ class FilterResultsComponent extends Object
  * @return int
  * @access protected
  */
-    function _check()
+    protected function _check()
     {
         
         // Tira criptografia de todos os parametros
@@ -635,7 +630,7 @@ class FilterResultsComponent extends Object
  * @return array
  * @access protected
  */
-    function _filterFields()
+    protected function _filterFields()
     {
         $result = array();
         
@@ -657,7 +652,7 @@ class FilterResultsComponent extends Object
  * @param array $options
  * @access protected
  */
-    function _makeConditions($field, $options = null)
+    protected function _makeConditions($field, $options = null)
     {
         
         // Array privado da função
@@ -714,7 +709,7 @@ class FilterResultsComponent extends Object
                         break;
                 }
                 
-                $this->controller->data[$this->_options['prefix']][$this->_options['operator']][$field] = $this->_params[sprintf('%s.%s.%s', $this->_options['prefix'], $this->_options['operator'], $field)];
+                $this->params->data[$this->_options['prefix']][$this->_options['operator']][$field] = $this->_params[sprintf('%s.%s.%s', $this->_options['prefix'], $this->_options['operator'], $field)];
             }
             
             
@@ -723,8 +718,8 @@ class FilterResultsComponent extends Object
             );
             
             
-            $this->controller->data[$this->_options['prefix']][$this->_options['fieldModel']][$field] = $this->_params[sprintf('%s.%s.%s', $this->_options['prefix'], $this->_options['fieldModel'], $field)];
-            $this->controller->data[$this->_options['prefix']][$field] = $this->_params[sprintf('%s.%s', $this->_options['prefix'], $field)];
+            $this->params->data[$this->_options['prefix']][$this->_options['fieldModel']][$field] = $this->_params[sprintf('%s.%s.%s', $this->_options['prefix'], $this->_options['fieldModel'], $field)];
+            $this->params->data[$this->_options['prefix']][$field] = $this->_params[sprintf('%s.%s', $this->_options['prefix'], $field)];
             
             return $condition;
         }
@@ -764,13 +759,16 @@ class FilterResultsComponent extends Object
                         {
                             $value = $this->_params[sprintf('%s.%s', $this->_options['prefix'], $field)];
                         }
-                        
 
 
+                        /**
+                         * POR VINICIUS ARANTES
+                         * Conditions para operador 'BETWEEN'
+                         */
                         if ($operator == 'BETWEEN')
                         {
                             // Verifica a existencia dos dois parâmetros
-                            if( !isset($this->_params[sprintf('%s.%s', $this->_options['prefix'], $field)]) || !isset($this->_params[sprintf('%s.%s2', $this->_options['prefix'], $field)]) )
+                            if( !isset($this->_params[sprintf('%s.%s', $this->_options['prefix'], $field)]) || !isset($this->_params[sprintf('%s.%s2', $this->_options['prefix'], $field)]) ) 
                             {
                                 
                                 if (isset($this->_params[sprintf('%s.%s', $this->_options['prefix'], $field)]))
@@ -792,8 +790,9 @@ class FilterResultsComponent extends Object
                                 $value2 = $this->_params[sprintf('%s.%s2', $this->_options['prefix'], $field)];
                             }
                             
+                            
                             // Altera o formato da data para formato de banco
-                            if( isset($options[$fieldModel]['convertDate']) && $options[$fieldModel]['convertDate'] )
+                            if(isset($options[$fieldModel]['convertDate']) && $options[$fieldModel]['convertDate'])
                             {
                                 $value = implode(preg_match("~\/~", $value) == 0 ? "/" : "-", array_reverse(explode(preg_match("~\/~", $value) == 0 ? "-" : "/", $value)));
                                 $value2 = implode(preg_match("~\/~", $value2) == 0 ? "/" : "-", array_reverse(explode(preg_match("~\/~", $value2) == 0 ? "-" : "/", $value2)));
@@ -802,9 +801,7 @@ class FilterResultsComponent extends Object
                             // Cria conditions de between em formato cake
                             $value = array($value, $value2);
                             $operator = 'BETWEEN ? AND ?';
-                            $condition += array(
-                                sprintf('%s %s', $fieldModel, $operator) => $value
-                            );
+                            $condition += array(sprintf('%s %s', $fieldModel, $operator) => $value);
                             
                             // Deixa o form preenchido para os dois campos
                             $this->controller->data[$this->_options['prefix']][$field] = $this->_params[sprintf('%s.%s', $this->_options['prefix'], $field)];
@@ -813,15 +810,15 @@ class FilterResultsComponent extends Object
                         }
                         else
                         {
-                            
+
                             $beforeValue = (isset($options[$fieldModel]['beforeValue'])) ? $options[$fieldModel]['beforeValue'] : '';
                             $afterValue = (isset($options[$fieldModel]['afterValue'])) ? $options[$fieldModel]['afterValue'] : '';
-
+                            
                             $condition += array(
                                 sprintf('%s %s', $fieldModel, $operator) => sprintf('%s%s%s', $beforeValue, $value, $afterValue)
                             );
                             
-                            $this->controller->data[$this->_options['prefix']][$field] = $this->_params[sprintf('%s.%s', $this->_options['prefix'], $field)];
+                            $this->params->data[$this->_options['prefix']][$field] = $this->_params[sprintf('%s.%s', $this->_options['prefix'], $field)];
                         }
 
                     }
@@ -842,7 +839,7 @@ class FilterResultsComponent extends Object
  * @return array
  * @access protected
  */
-    function getModelFields()
+    protected function getModelFields()
     {
         
         if( !(isset($this->controller->modelNames[0])) )
@@ -860,11 +857,11 @@ class FilterResultsComponent extends Object
     }
 
 
-/**
- * FUNÇÃO CRIADA POR VINICIUS ARANTES (vinicius.big@gmail.com)
- * @param type $name
- * @return type 
- */
+    /**
+     * FUNÇÃO CRIADA POR VINICIUS ARANTES (vinicius.big@gmail.com)
+     * @param type $name
+     * @return type 
+     */
     function getOperation($name)
     {
         foreach ($this->_options['filters'][$name] as $key => $value)

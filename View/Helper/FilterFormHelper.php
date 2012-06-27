@@ -2,15 +2,15 @@
 /**
  * Helper para criação de campos de formulário para o Componente 'Filter Results'
  *
- * Compatível com PHP 4 e 5
+ * Compatível com PHP 5.2+
  *
  * Licenciado pela Creative Commons 3.0
  *
  * @filesource
- * @copyright  Copyright 2011, Pedro Elsner (http://pedroelsner.com/)
+ * @copyright  Copyright 2012, Pedro Elsner (http://pedroelsner.com/)
  * @author     Pedro Elsner <pedro.elsner@gmail.com>
  * @license    Creative Commons 3.0 (http://creativecommons.org/licenses/by/3.0/br/)
- * @since      v 1.0
+ * @since      v 2.0
  */
 
 
@@ -20,7 +20,7 @@
  * @use        AppHelper
  * @package    filter_results
  * @subpackage filter_results.filter_form
- * @link       http://www.github.com/pedroelsner/filter_results/
+ * @link       http://www.github.com/pedroelsner/FilterResults2
  */
 class FilterFormHelper extends AppHelper
 {
@@ -50,10 +50,10 @@ class FilterFormHelper extends AppHelper
  * 
  * Recebe referencia do Componente 'Filter Results'
  *
- * @params object $component Referencia ao componente 'Filter Results'
+ * @param object $component Referencia ao componente 'Filter Results'
  * @access protected
  */
-    function _setup(&$component)
+    protected function _setup(&$component)
     {
         if ( !(is_object($component)) )
         {
@@ -73,7 +73,7 @@ class FilterFormHelper extends AppHelper
  * @return boolean
  * @access protected
  */
-    function _hasComponent()
+    protected function _hasComponent()
     {
         return (is_object($this->_component)) ? true : false;
     }
@@ -87,7 +87,7 @@ class FilterFormHelper extends AppHelper
  * @return string
  * @access public
  */
-    function create(&$controller, $settings = array())
+    public function create(&$controller, $settings = array())
     {
         
         $this->_setup($controller);
@@ -125,7 +125,7 @@ class FilterFormHelper extends AppHelper
  * @return string
  * @access public
  */
-    function end($submit = null, $settings = array())
+    public function end($submit = null, $settings = array())
     {
         if ( !($this->_hasComponent()) )
         {
@@ -144,7 +144,7 @@ class FilterFormHelper extends AppHelper
  * @return string
  * @access public
  */
-    function submit($name, $settings = array())
+    public function submit($name, $settings = array())
     {
         if ( !($this->_hasComponent()) )
         {
@@ -161,10 +161,10 @@ class FilterFormHelper extends AppHelper
  *
  * @param string $name
  * @param array $settings
- * @result string
+ * @return string
  * @access public
  */
-    function input($name, $settings = array())
+    public function input($name, $settings = array())
     {
         if ( !($this->_hasComponent()) )
         {
@@ -178,8 +178,13 @@ class FilterFormHelper extends AppHelper
         
         
         $settings['options'] = $this->_component->getFieldValues($name);
-        
-        if($this->_component->getOperation($name) == 'BETWEEN')
+
+
+        /**
+         * POR VINICIUS ARANTES 
+         * Gera 2 campos para considção 'BETWEEN'
+         */    
+        if($this->_component->getOperation($name) == 'BETWEEN') 
         {
             echo $this->Form->input(sprintf('%s.%s', $this->_component->getPrefix(), $name), $settings)
                . " "
@@ -187,7 +192,7 @@ class FilterFormHelper extends AppHelper
         }
         else
         {
-            echo $this->Form->input(sprintf('%s.%s', $this->_component->getPrefix(), $name), $settings);
+            echo $this->Form->input(sprintf('%s.%s', $this->_component->getPrefix(), $name), $settings);    
         }
         
     }
@@ -201,10 +206,10 @@ class FilterFormHelper extends AppHelper
  * @param string $name
  * @param array $options
  * @param array $settings
- * @result string
+ * @return string
  * @access public
  */
-    function selectOperators($name, $options = null, $settings = array())
+    public function selectOperators($name, $options = null, $settings = array())
     {    
         if ( !($this->_hasComponent()) )
         {
@@ -252,10 +257,10 @@ class FilterFormHelper extends AppHelper
  * @param string $name
  * @param array $options
  * @param array $settings
- * @result string
+ * @return string
  * @access public
  */
-    function selectFields($name, $options = null, $settings = null)
+    public function selectFields($name, $options = null, $settings = null)
     {
         if ( !($this->_hasComponent()) )
         {
