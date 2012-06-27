@@ -5,7 +5,7 @@ Generates `conditions` to `find` methods in CakePHP 2.x from a search form.
 ## Compatibility
 
 Compatible with CakePHP 2.x + Paginate (Component)
-* Version for CakePHP 1.3: [http://github.com/pedroelsner/filter_results/](http://github.com/pedroelsner/filter_results/ "FilterResults para CakePHP 1.3")
+* Version for CakePHP 1.3: [http://github.com/pedroelsner/filter_results/tree/1.3](http://github.com/pedroelsner/filter_results/tree/1.3 "FilterResults para CakePHP 1.3")
 
 # Installation
 

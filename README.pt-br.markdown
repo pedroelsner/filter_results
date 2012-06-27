@@ -5,7 +5,7 @@ Plugin que gera `conditions` para métodos `find` no CakePHP 2.x a partir de um 
 ## Compatibilidade
 
 Compatível com CakePHP 2.x + Paginate (Component)
-* Versão para CakePHP 1.3: [http://github.com/pedroelsner/filter_results/](http://github.com/pedroelsner/filter_results/ "FilterResults para CakePHP 1.3")
+* Versão para CakePHP 1.3: [http://github.com/pedroelsner/filter_results/tree/1.3](http://github.com/pedroelsner/filter_results/tree/1.3 "FilterResults para CakePHP 1.3")
 
 # Instalação
 
