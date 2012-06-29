@@ -682,6 +682,7 @@ class FilterResultsComponent extends Component
                 
             if ( !(isset($this->_params[sprintf('%s.%s.%s', $this->_options['prefix'], $this->_options['operator'], $field)])) )
             {
+                $value = str_replace(' ', '%', $value);
                 $operator = 'LIKE';
                 $beforeValue = '%';
                 $afterValue = '%';
@@ -694,6 +695,7 @@ class FilterResultsComponent extends Component
                 {
                     case 'like':
                     case 'not like':
+                        $value = str_replace(' ', '%', $value);
                         $beforeValue = '%';
                         $afterValue = '%';
                         break;
@@ -711,7 +713,7 @@ class FilterResultsComponent extends Component
                 
                 $this->params->data[$this->_options['prefix']][$this->_options['operator']][$field] = $this->_params[sprintf('%s.%s.%s', $this->_options['prefix'], $this->_options['operator'], $field)];
             }
-            
+
             
             $condition = array(
                 sprintf('%s %s', $fieldModel, $operator) => sprintf('%s%s%s', $beforeValue, $value, $afterValue)
