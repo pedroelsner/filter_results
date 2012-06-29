@@ -682,7 +682,6 @@ class FilterResultsComponent extends Component
                 
             if ( !(isset($this->_params[sprintf('%s.%s.%s', $this->_options['prefix'], $this->_options['operator'], $field)])) )
             {
-                $value = str_replace(' ', '%', $value);
                 $operator = 'LIKE';
                 $beforeValue = '%';
                 $afterValue = '%';
@@ -695,7 +694,6 @@ class FilterResultsComponent extends Component
                 {
                     case 'like':
                     case 'not like':
-                        $value = str_replace(' ', '%', $value);
                         $beforeValue = '%';
                         $afterValue = '%';
                         break;
@@ -715,9 +713,22 @@ class FilterResultsComponent extends Component
             }
 
             
-            $condition = array(
-                sprintf('%s %s', $fieldModel, $operator) => sprintf('%s%s%s', $beforeValue, $value, $afterValue)
-            );
+            if (mb_strtolower($operator, 'utf-8') == 'like' || mb_strtolower($operator, 'utf-8') == 'not like')
+            {
+                $values = explode(" ", $value);
+                foreach ($values as $key2 => $value2)
+                {
+                    $condition['AND'][$key2] = array(
+                        sprintf('%s %s', $fieldModel, $operator) => sprintf('%s%s%s', $beforeValue, $value2, $afterValue)
+                    );
+                }
+            }
+            else
+            {
+                $condition = array(
+                    sprintf('%s %s', $fieldModel, $operator) => sprintf('%s%s%s', $beforeValue, $value, $afterValue)
+                );
+            }
             
             
             $this->params->data[$this->_options['prefix']][$this->_options['fieldModel']][$field] = $this->_params[sprintf('%s.%s.%s', $this->_options['prefix'], $this->_options['fieldModel'], $field)];
@@ -815,12 +826,26 @@ class FilterResultsComponent extends Component
 
                             $beforeValue = (isset($options[$fieldModel]['beforeValue'])) ? $options[$fieldModel]['beforeValue'] : '';
                             $afterValue = (isset($options[$fieldModel]['afterValue'])) ? $options[$fieldModel]['afterValue'] : '';
-                            
-                            $condition += array(
-                                sprintf('%s %s', $fieldModel, $operator) => sprintf('%s%s%s', $beforeValue, $value, $afterValue)
-                            );
-                            
+
+                            if (mb_strtolower($operator, 'utf-8') == 'like' || mb_strtolower($operator, 'utf-8') == 'not like')
+                            {
+                                $values = explode(" ", $value);
+                                foreach ($values as $key2 => $value2)
+                                {
+                                    $condition['AND'][$key2] = array(
+                                       sprintf('%s %s', $fieldModel, $operator) => sprintf('%s%s%s', $beforeValue, $value2, $afterValue)
+                                    );
+                                }
+                            }
+                            else
+                            {
+                                $condition += array(
+                                    sprintf('%s %s', $fieldModel, $operator) => sprintf('%s%s%s', $beforeValue, $value, $afterValue)
+                                );
+                            }
+
                             $this->params->data[$this->_options['prefix']][$field] = $this->_params[sprintf('%s.%s', $this->_options['prefix'], $field)];
+                            
                         }
 
                     }
