@@ -544,6 +544,7 @@ class FilterResultsComponent extends Component
             }
             
             $this->controller->redirect($url, null, true);
+            
         }
         
         
@@ -771,6 +772,11 @@ class FilterResultsComponent extends Component
                         else
                         {
                             $value = $this->_params[sprintf('%s.%s', $this->_options['prefix'], $field)];
+                        }
+
+                        if ( empty($value) )
+                        {
+                            return $condition;
                         }
 
 
