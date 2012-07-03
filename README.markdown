@@ -26,7 +26,10 @@ Edit the file __/app/AppController.php__:
 <pre>
 var $components = array(
     'FilterResults.FilterResults' => array(
-        'autoPaginate' => false
+        'autoPaginate'       => false,
+        'autoLikeExplode'    => true,  // recommended
+        'explodeChar'        => ' ',   // recommended
+        'explodeConcatenate' => 'AND'  // recommended (can be 'OR' or 'NOT')
     )
 );
 
@@ -38,6 +41,8 @@ var $helpers = array(
 Settings parameters:
 
 *   __autoPaginate:__ If you set TRUE, the Paginate will be configured automatically.
+*   __autoLikeExplode:__ If you set TRUE, the values will be explode by the `explodeChar` and concatenate like by `explodeConcatenate`.
+** Example for follow settings: Filter User.name by 'Pedro Elsner': `WHERE ((User.name like '%Pedro%') AND (User.name like '%Elsner%'))`
 
 # Using the Component
 
@@ -81,8 +86,8 @@ function index() {
             'filter1' => array(
                 'User.name' => array(
                     'operator'    => 'LIKE',
-                    'beforeValue' => '%', // Opcional
-                    'afterValue'  => '%'  // Opcional
+                    'beforeValue' => '%', // optional
+                    'afterValue'  => '%'  // optional
                 )
             )
         )

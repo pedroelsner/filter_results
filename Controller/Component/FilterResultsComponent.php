@@ -289,7 +289,66 @@ class FilterResultsComponent extends Component {
 
         $this->_options['autoPaginate'] = $autoPaginate;
     }
+
+
+/**
+ * Get Auto Like Explode
+ *
+ * @return string
+ * @access public
+ * @since  2.0
+ */
+    public function getAutoLikeExplode() {
+        return $this->_options['autoLikeExplode'];
+    }
     
+    
+/**
+ * Set Auto Like Explode
+ *
+ * @param string $autoLikeExplode
+ * @throws Exception Quando $autoLikeExplode não for boleana
+ * @access public
+ * @since  2.0
+ */
+    public function setAutoLikeExplode($autoLikeExplode) {
+
+        if (!is_bool($autoLikeExplode)) {
+            throw new Exception('$autoLikeExplode type must be boolean');
+        }
+
+        $this->_options['autoLikeExplode'] = $autoLikeExplode;
+    }
+
+/**
+ * Get Explode Char
+ *
+ * @return string
+ * @access public
+ * @since  2.0
+ */
+    public function getExplodeChar() {
+        return $this->_options['explodeChar'];
+    }
+    
+    
+/**
+ * Set Explode Char
+ *
+ * @param string $autoLikeExplode
+ * @throws Exception Quando $autoLikeExplode não for string
+ * @access public
+ * @since  2.0
+ */
+    public function setExplodeChar($explodeChar) {
+
+        if (!is_string($explodeChar)) {
+            throw new Exception('$autoLikeExplode type must be string');
+        }
+
+        $this->_options['explodeChar'] = $explodeChar;
+    }
+
     
 /**
  * Get Prefix
@@ -664,8 +723,8 @@ class FilterResultsComponent extends Component {
                             $beforeValue = (isset($options[$fieldModel]['beforeValue'])) ? $options[$fieldModel]['beforeValue'] : '';
                             $afterValue = (isset($options[$fieldModel]['afterValue'])) ? $options[$fieldModel]['afterValue'] : '';
 
-                            if (mb_strtolower($operator, 'utf-8') == 'like' || mb_strtolower($operator, 'utf-8') == 'not like') {
-                                $condition += $this->_valueConcatenateLike($fieldModel, $operator, $value, $beforeValue, $afterValue);
+                            if ($this->__isMayExplodeValue($operator)) {
+                                $condition += $this->_valueConcatenate($fieldModel, $operator, $value, $beforeValue, $afterValue);
                             } else {
                                 $condition += array(
                                     sprintf('%s %s', $fieldModel, $operator) => sprintf('%s%s%s', $beforeValue, $value, $afterValue)
@@ -682,6 +741,28 @@ class FilterResultsComponent extends Component {
         }
         
         return $condition;
+    }
+
+
+/**
+ * Is May Explode Value
+ * 
+ * Função que verifica a possíbilidade de "explodir" o valor
+ * 
+ * @param string $operator
+ * @return boolean
+ * @access private
+ * @since 2.0
+ */
+    private function __isMayExplodeValue($operator) {
+
+        if (mb_strtolower($operator, 'utf-8') == 'like' || mb_strtolower($operator, 'utf-8') == 'not like') {
+            if ($this->_options['autoLikeExplode']) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
 
@@ -791,8 +872,8 @@ class FilterResultsComponent extends Component {
         }
 
             
-        if (mb_strtolower($operator, 'utf-8') == 'like' || mb_strtolower($operator, 'utf-8') == 'not like') {
-            $condition = $this->_valueConcatenateLike($fieldModel, $operator, $value, $beforeValue, $afterValue);
+        if ($this->__isMayExplodeValue($operator)) {
+            $condition = $this->_valueConcatenate($fieldModel, $operator, $value, $beforeValue, $afterValue);
         } else {
             $condition = array(
                 sprintf('%s %s', $fieldModel, $operator) => sprintf('%s%s%s', $beforeValue, $value, $afterValue)
@@ -820,12 +901,12 @@ class FilterResultsComponent extends Component {
  * @return array
  * @since 2.0
  */
-    protected function _valueConcatenateLike($fieldModel, $operator, $value, $beforeValue = '', $afterValue = '') {
+    protected function _valueConcatenate($fieldModel, $operator, $value, $beforeValue = '', $afterValue = '') {
 
-        $values = explode(" ", $value);
+        $values = explode($this->_options['explodeChar'], $value);
 
         foreach ($values as $key => $value) {
-            $condition['AND'][$key] = array(
+            $condition[$this->_options['explodeConcatenate']][$key] = array(
                 sprintf('%s %s', $fieldModel, $operator) => sprintf('%s%s%s', $beforeValue, $value, $afterValue)
             );
         }
