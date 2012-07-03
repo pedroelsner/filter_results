@@ -74,11 +74,8 @@ Bom, após gerar as telas pelo Bake, vamos colocar um filtro sobre a grid(tabela
 
 Arquivo __/app/Controller/UsersController.php__
 <pre>
-function index()
-{
-    $this->User->recursive = 0;
-
-    // Filter Results
+function index() {
+    
     $this->FilterResults->addFilters(
         array(
             'filter1' => array(
@@ -90,12 +87,12 @@ function index()
             )
         )
     );
-    
-    // Paginate
-    $this->paginate['order'] = 'User.name ASC';
-    $this->paginate['limit'] = 10;
-    $this->paginate['conditions'] = $this->FilterResults->make();
 
+    $this->FilterResults->setPaginate('order', 'User.name ASC');
+    $this->FilterResults->setPaginate('limit', 10);
+    $this->FilterResults->setPaginate('conditions', $this->FilterResults->make());
+
+    $this->User->recursive = 0;
     $this->set('users', $this->paginate());
 }
 </pre>
@@ -174,11 +171,8 @@ Vamos mudar nosso filtro. Além de filtrar pelo nome, queremos agora filtrar tam
 
 Arquivo __/app/Controller/UsersController.php__
 <pre>
-function index()
-{
-    $this->User->recursive = 0;
-
-    // Filter Results
+function index() {
+    
     $this->FilterResults->addFilters(
         array(
             'filter1' => array(
@@ -196,11 +190,11 @@ function index()
         )
     );
     
-    // Paginate
-    $this->paginate['order'] = 'User.name ASC';
-    $this->paginate['limit'] = 10;
-    $this->paginate['conditions'] = $this->FilterResults->make();
-    
+    $this->FilterResults->setPaginate('order', 'User.name ASC');
+    $this->FilterResults->setPaginate('limit', 10);
+    $this->FilterResults->setPaginate('conditions', $this->FilterResults->make());
+
+    $this->User->recursive = 0;
     $this->set('users', $this->paginate());
 }
 </pre>
@@ -224,18 +218,15 @@ Em alguns casos queremos algo diferente diferente, por exemplo, desejamos que o 
 
 Arquivo __/app/Controller/UsersController.php__
 <pre>
-function index()
-{
-    $this->User->recursive = 0;
+function index() {
     
-    // Filter Results
     $this->FilterResults->addFilters(array('filter1'));
     
-    // Paginate
-    $this->paginate['order'] = 'User.name ASC';
-    $this->paginate['limit'] = 10;
-    $this->paginate['conditions'] = $this->FilterResults->make();
+    $this->FilterResults->setPaginate('order', 'User.name ASC');
+    $this->FilterResults->setPaginate('limit', 10);
+    $this->FilterResults->setPaginate('conditions', $this->FilterResults->make());
 
+    $this->User->recursive = 0;
     $this->set('users', $this->paginate());
 }
 </pre>
@@ -305,12 +296,9 @@ array(
 
 # Operador BETWEEN
 
-## Por: Vinicius Arantes
-
-Agora também é possível utilizar o operador `BETWEEN` para consulta entre valores numéricos ou de data. Configure o campo de filtro desta forma:
+Também é possível utilizar o operador `BETWEEN` para consulta entre valores numéricos ou de data. Configure o campo de filtro desta forma:
 
 <pre>
-// Filter Results
 $this->FilterResults->addFilters(
     array(
         'filter1' => array(
@@ -325,7 +313,6 @@ $this->FilterResults->addFilters(
 Para campos de data, adicione a opção `'convertDate' => true` para converte a data informada para o formato `YYYY-MM-DD`:
 
 <pre>
-// Filter Results
 $this->FilterResults->addFilters(
     array(
         'filter1' => array(
@@ -343,3 +330,7 @@ $this->FilterResults->addFilters(
 Copyright 2012, Pedro Elsner (http://pedroelsner.com/)
 
 Licenciado pela Creative Commons 3.0 (http://creativecommons.org/licenses/by/3.0/br/)
+
+## Agradecimento
+
+* Vinícius Arantes (vinicius.big@gmail.com)
