@@ -349,7 +349,42 @@ class FilterResultsComponent extends Component {
         $this->_options['explodeChar'] = $explodeChar;
     }
 
-    
+
+/**
+ * Get Explode Concatenate
+ *
+ * @return string
+ * @access public
+ * @since  2.0
+ */
+    public function getExplodeConcatenate() {
+        return $this->_options['explodeConcatenate'];
+    }
+
+
+/**
+ * Set Explode Concatenate
+ *
+ * @param string $autoLikeExplode
+ * @throws Exception Quando $autoLikeExplode não for string
+ * @throws Exception Quando $autoLikeExplode deve ser: 'AND' ou 'OR'
+ * @access public
+ * @since  2.0
+ */
+    public function setExplodeConcatenate($explodeConcatenate) {
+
+        if (!is_string($explodeConcatenate)) {
+            throw new Exception('$autoLikeExplode type must be string');
+        }
+        
+        if (mb_strtolower($explodeConcatenate, 'utf-8') != 'AND' &&  mb_strtolower($explodeConcatenate, 'utf-8') != 'OR') {
+            throw new Exception("$autoLikeExplode must be: 'AND' or 'OR'");
+        }
+
+        $this->_options['explodeConcatenate'] = $explodeConcatenate;
+    }
+
+
 /**
  * Get Prefix
  *
@@ -851,7 +886,7 @@ class FilterResultsComponent extends Component {
 
             $operator = $this->_params[sprintf('%s.%s.%s', $this->_options['prefix'], $this->_options['operator'], $field)];
             
-            switch(mb_strtolower($this->_params[sprintf('%s.%s.%s', $this->_options['prefix'], $this->_options['operator'], $field)], 'UTF-8')) {
+            switch(mb_strtolower($this->_params[sprintf('%s.%s.%s', $this->_options['prefix'], $this->_options['operator'], $field)], 'utf-8')) {
                 case 'like':
                 case 'not like':
                     $beforeValue = '%';

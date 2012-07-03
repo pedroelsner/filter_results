@@ -29,7 +29,7 @@ var $components = array(
         'autoPaginate'       => false,
         'autoLikeExplode'    => true,  // recommended
         'explodeChar'        => ' ',   // recommended
-        'explodeConcatenate' => 'AND'  // recommended (can be 'OR' or 'NOT')
+        'explodeConcatenate' => 'AND'  // recommended (can be 'OR')
     )
 );
 
@@ -42,7 +42,7 @@ Settings parameters:
 
 *   __autoPaginate:__ If you set TRUE, the Paginate will be configured automatically.
 *   __autoLikeExplode:__ If you set TRUE, the values will be explode by the `explodeChar` and concatenate like by `explodeConcatenate`.
-** Example for follow settings: Filter User.name by 'Pedro Elsner': `WHERE ((User.name like '%Pedro%') AND (User.name like '%Elsner%'))`
+* * Example for follow settings: Filter User.name by 'Pedro Elsner': `WHERE ((User.name like '%Pedro%') AND (User.name like '%Elsner%'))`
 
 # Using the Component
 
@@ -115,6 +115,19 @@ $this->FilterForm->end();
 </pre>
 
 Ready! We have a field that filters the user by name and compatible with the Paginate.
+
+## Change Default Settings
+
+Sometimes you need change the default setting of Filter Results into determinate `action`. For this, use the follow code:
+
+<pre>
+$this->FilterResults->setAutoLikeExplode(false);
+
+// or
+
+$this->FilterResults->setExplodeChar('-');
+$this->FilterResults->setExplodeConcatenate('OR');
+</pre>
 
 # Simple Filter + Composite Rule
 
