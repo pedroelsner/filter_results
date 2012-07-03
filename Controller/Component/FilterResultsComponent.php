@@ -11,7 +11,7 @@
  * @copyright  Copyright 2012, Pedro Elsner (http://pedroelsner.com/)
  * @author     Pedro Elsner <pedro.elsner@gmail.com>
  * @license    Creative Commons 3.0 (http://creativecommons.org/licenses/by/3.0/br/)
- * @since      v 2.0
+ * @version    2.0
  */
 
 
@@ -32,6 +32,7 @@ class FilterResultsComponent extends Component
  * @var int
  * @access public
  * @static
+ * @since  1.0
  */
     public static $instances = 0;
     
@@ -40,6 +41,7 @@ class FilterResultsComponent extends Component
  *
  * @var int
  * @access private
+ * @since  1.0
  */
     private $_instance;
     
@@ -48,6 +50,7 @@ class FilterResultsComponent extends Component
  *
  * @var array
  * @access private
+ * @since  1.0
  */
     private $_options = array(
         'autoPaginate' => false,
@@ -64,6 +67,7 @@ class FilterResultsComponent extends Component
  *
  * @var array
  * @access private
+ * @since  1.0
  */
     private $_conditions;
 
@@ -72,6 +76,7 @@ class FilterResultsComponent extends Component
  *
  * @var array
  * @access private
+ * @since  1.0
  */
     private $_params = array();
     
@@ -82,6 +87,7 @@ class FilterResultsComponent extends Component
  * No carregamento da classe, grava e acrescenta números de instâncias
  *
  * @access public
+ * @since  1.0
  */
     public function __construct(ComponentCollection $collection, $settings = array())
     {
@@ -96,6 +102,7 @@ class FilterResultsComponent extends Component
  * Ao clonar a classe, grava e acrescenta números de instâncias
  *
  * @access public
+ * @since  1.0
  */
     public function __clone()
     {
@@ -112,6 +119,7 @@ class FilterResultsComponent extends Component
  * @param object $controller Passa por referencia o Controller
  * @param array $fields Passa as configurações dos campos para pesquisa
  * @access public
+ * @since  1.0
  */
     public function initialize(Controller $controller)
     {
@@ -127,6 +135,7 @@ class FilterResultsComponent extends Component
  *
  * @param object $controller Passa por referencia o Controller
  * @access public
+ * @since  1.0
  */
     public function startup(Controller $controller)
     {
@@ -141,6 +150,7 @@ class FilterResultsComponent extends Component
  *
  * @param object $controller Passa por referencia o Controller 
  * @access public
+ * @since  1.0
  */
     public function beforeRender(Controller $controller)
     {
@@ -155,6 +165,7 @@ class FilterResultsComponent extends Component
  *
  * @param object $controller Passa por referencia o Controller 
  * @access public
+ * @since  1.0
  */
     public function shutdown(Controller $controller)
     {
@@ -172,6 +183,7 @@ class FilterResultsComponent extends Component
  * @param string $status
  * @param boolean $exit
  * @access public
+ * @since  1.0
  */
     public function beforeRedirect(Controller $controller, $url, $status=null, $exit=true)
     {
@@ -185,6 +197,7 @@ class FilterResultsComponent extends Component
  * @param string $string
  * @return string
  * @access protected
+ * @since  1.0
  */
     protected function _encrypt($string)
     {
@@ -203,6 +216,7 @@ class FilterResultsComponent extends Component
  * @param string $string
  * @return string
  * @access protected
+ * @since  1.0
  */
     protected function _decrypt($string)
     {
@@ -220,6 +234,7 @@ class FilterResultsComponent extends Component
  *
  * @return string
  * @access public
+ * @since  1.0
  */
     public function getFormOptions()
     {
@@ -232,6 +247,7 @@ class FilterResultsComponent extends Component
  *
  * @return string
  * @access public
+ * @since  1.0
  */
     public function getFieldModel()
     {
@@ -244,6 +260,7 @@ class FilterResultsComponent extends Component
  *
  * @return string
  * @access public
+ * @since  1.0
  */
     public function getOperator()
     {
@@ -256,6 +273,7 @@ class FilterResultsComponent extends Component
  *
  * @return string
  * @access public
+ * @since  1.0
  */
     public function getConditions()
     {
@@ -268,6 +286,7 @@ class FilterResultsComponent extends Component
  *
  * @return string
  * @access public
+ * @since  1.0
  */
     public function getAutoPaginate()
     {
@@ -281,6 +300,7 @@ class FilterResultsComponent extends Component
  * @param string $autoPaginate
  * @return boolean
  * @access public
+ * @since  1.0
  */
     public function setAutoPaginate($autoPaginate)
     {
@@ -302,6 +322,7 @@ class FilterResultsComponent extends Component
  *
  * @return string
  * @access public
+ * @since  1.0
  */
     public function getPrefix()
     {
@@ -316,6 +337,7 @@ class FilterResultsComponent extends Component
  * @param string $prefix
  * @return string
  * @access public
+ * @since  1.0
  */
     public function setPrefix($prefix)
     {
@@ -341,6 +363,7 @@ class FilterResultsComponent extends Component
  * @param string $field
  * @return boolean
  * @access public
+ * @since  1.0
  */
     public function hasField($field)
     {
@@ -372,6 +395,7 @@ class FilterResultsComponent extends Component
  * @param string $field
  * @return array
  * @access public
+ * @since  1.0
  */
     public function getFieldValues($field)
     {
@@ -395,6 +419,7 @@ class FilterResultsComponent extends Component
  * @param array $array
  * @return array
  * @access public
+ * @since  1.0
  */
     public function _foreachFieldForValues($array)
     {
@@ -428,6 +453,7 @@ class FilterResultsComponent extends Component
  * @param array $filters
  * @return boolean
  * @access public
+ * @since  1.0
  */
     public function setFilters($filters = null)
     {
@@ -451,6 +477,7 @@ class FilterResultsComponent extends Component
  * @param array $options
  * @return boolean
  * @access public
+ * @since  1.0
  */
     public function merge($default, $options)
     {
@@ -468,6 +495,7 @@ class FilterResultsComponent extends Component
  * @param array $filters
  * @return boolean
  * @access public
+ * @since  1.0
  */
     public function addFilters($filters = null)
     {
@@ -496,6 +524,7 @@ class FilterResultsComponent extends Component
  * Gera o array 'conditions' para o componente 'Paginator' do Controller
  *
  * @access public
+ * @since  1.0
  */
     public function make()
     {
@@ -595,6 +624,7 @@ class FilterResultsComponent extends Component
  *
  * @return int
  * @access protected
+ * @since  1.0
  */
     protected function _check()
     {
@@ -630,6 +660,7 @@ class FilterResultsComponent extends Component
  *
  * @return array
  * @access protected
+ * @since  1.0
  */
     protected function _filterFields()
     {
@@ -652,6 +683,7 @@ class FilterResultsComponent extends Component
  * @param array $field
  * @param array $options
  * @access protected
+ * @since  1.0
  */
     protected function _makeConditions($field, $options = null)
     {
@@ -871,6 +903,7 @@ class FilterResultsComponent extends Component
  *
  * @return array
  * @access protected
+ * @since  1.0
  */
     protected function getModelFields()
     {
@@ -890,12 +923,15 @@ class FilterResultsComponent extends Component
     }
 
 
-    /**
-     * FUNÇÃO CRIADA POR VINICIUS ARANTES (vinicius.big@gmail.com)
-     * @param type $name
-     * @return type 
-     */
-    function getOperation($name)
+/**
+ * Get Operation
+ * 
+ * @param type $name
+ * @return type
+ * @access public
+ * @since  1.1
+ */
+    public function getOperation($name)
     {
         foreach ($this->_options['filters'][$name] as $key => $value)
         {
@@ -905,6 +941,24 @@ class FilterResultsComponent extends Component
             }
         }
         return '';
+    }
+
+
+/**
+ * Set Paginate
+ * 
+ * Define opções do Component Paginator para CakePHP2.2+
+ * 
+ * @param string $option Opção
+ * @param type   $value  Valor
+ * @access public
+ * @since 2.0
+ */
+    public function setPaginate($option, $value)
+    {
+        $paginate = $this->controller->paginate;
+        $paginate[$option] = $value;
+        $this->controller->paginate = $paginate;
     }
     
 }
