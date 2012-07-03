@@ -297,8 +297,6 @@ array(
 
 # Operator BETWEEN
 
-## By: Vinicius Arantes
-
 Now is possible too use the operator `BETWEEN` in FilterResults:
 
 <pre>
@@ -319,3 +317,7 @@ $this->FilterResults->addFilters(
 Copyright 2011, Pedro Elsner (http://pedroelsner.com/)
 
 Licensed under Creative Commons 3.0 (http://creativecommons.org/licenses/by/3.0/)
+
+## Thanks
+
+* Vinícius Arantes (vinicius.big@gmail.com)

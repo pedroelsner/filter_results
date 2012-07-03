@@ -297,9 +297,7 @@ array(
 
 # Operador BETWEEN
 
-## Por: Vinicius Arantes
-
-Agora também é possível utilizar o operador `BETWEEN` para consulta entre valores numéricos ou de data. Configure o campo de filtro desta forma:
+Também é possível utilizar o operador `BETWEEN` para consulta entre valores numéricos ou de data. Configure o campo de filtro desta forma:
 
 <pre>
 // Filter Results
@@ -335,3 +333,7 @@ $this->FilterResults->addFilters(
 Copyright 2011, Pedro Elsner (http://pedroelsner.com/)
 
 Licenciado pela Creative Commons 3.0 (http://creativecommons.org/licenses/by/3.0/br/)
+
+## Agradecimento
+
+* Vinícius Arantes (vinicius.big@gmail.com)
