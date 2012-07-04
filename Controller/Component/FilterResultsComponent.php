@@ -73,7 +73,7 @@ class FilterResultsComponent extends Component {
  * @access private
  * @since  1.0
  */
-    private $_conditions;
+    private $_conditions = array();
 
 /**
  * Recebe 'params' sem criptografia
@@ -257,6 +257,15 @@ class FilterResultsComponent extends Component {
  * @since  1.0
  */
     public function getConditions() {
+
+        if (!is_array($this->_conditions)) {
+            return $this->make();
+        }
+
+        if (count($this->_conditions) == 0) {
+            return $this->make();
+        }
+
         return $this->_conditions;
     }
     
@@ -538,14 +547,18 @@ class FilterResultsComponent extends Component {
  * Diferente do método setFilters(), este adiciona esta condição
  *
  * @param array $filters
- * @throws Exception Quando $filters não for um array
+ * @throws Exception Quando $filters não for um array ou string
  * @access public
  * @since  1.0
  */
     public function addFilters($filters = null) {
 
         if (!is_array($filters)) {
-            throw new Exception('$filters type must be a array');
+            if (!is_string($filters)) {
+                throw new Exception('$filters type must be a array or string');    
+            }
+
+            $filters = array($filters);
         }
         
         if (isset($this->_options['filters'])) {
@@ -628,7 +641,7 @@ class FilterResultsComponent extends Component {
         if ($this->_check() > 0) {
             $this->_conditions = $this->_filterFields();
             if ($this->_options['autoPaginate']) {
-                $this->controller->paginate['conditions'][] = $this->_conditions;
+                $this->controller->Paginator->paginate['conditions'][] = $this->_conditions;
             }
             return $this->_conditions;
         }
