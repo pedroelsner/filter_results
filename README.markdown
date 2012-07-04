@@ -158,10 +158,8 @@ $this->FilterResults->addFilter(
     array(
         'filter1' => array(
             'User.name' => array(
-                'operator'           => '=',
-                'explode'            => true,
-                'explodeChar'        => '-',
-                'explodeConcatenate' => 'OR'
+                'operator' => '=',
+                'explode'  => true
             )
         )
     )
