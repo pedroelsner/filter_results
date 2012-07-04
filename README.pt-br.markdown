@@ -9,7 +9,7 @@ Compatível com CakePHP 2.x + Paginate (Component)
 
 # Instalação
 
-Faça o download do plugin e coloque seu conteúdo dentro de `/app/Plugin/FilterResults2` ou em outro diretório para plugins do CakePHP.
+Faça o download do plugin e coloque seu conteúdo dentro de `/app/Plugin/filter_results` ou em outro diretório para plugins do CakePHP.
 
 ## Ativação
 
