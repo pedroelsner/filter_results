@@ -51,8 +51,6 @@ For the examples contained herein, will build on the following database
 CREATE TABLE groups (
     id INT UNSIGNED NOT NULL AUTO_INCREMENT,
     name VARCHAR(200) NOT NULL,
-    created DATETIME NULL,
-    modified DATETIME NULL,
     PRIMARY KEY(id),
     UNIQUE(name)
 ) ENGINE=INNODB;
@@ -62,16 +60,20 @@ CREATE TABLE users (
     group_id INT UNSIGNED NOT NULL,
     name VARCHAR(200) NOT NULL,
     username VARCHAR(20) NOT NULL,
-    password VARCHAR(100) NOT NULL,
-    created DATETIME NULL,
-    modified DATETIME NULL,
     active TINYINT(1) NOT NULL DEFAULT 1,
     PRIMARY KEY(id),
     FOREIGN KEY(group_id) REFERENCES groups(id),
     UNIQUE(username)
 ) ENGINE=INNODB;
 
+INSERT INTO groups(name) VALUES('Admin');
+INSERT INTO groups(name) VALUES('Guest');
 
+INSERT INTO users(group_id, name, username) VALUES(1, 'Pedro Elsner', 'pelsner');
+INSERT INTO users(group_id, name, username) VALUES(2, 'Lucas Pedro Mariano Elsner', 'lpmelsner');
+INSERT INTO users(group_id, name, username) VALUES(1, 'Petter Morato', 'pmorato');
+INSERT INTO users(group_id, name, username) VALUES(2, 'Rebeca Moraes Silva', 'rebeca_moraes');
+INSERT INTO users(group_id, name, username) VALUES(2, 'Silvia Morato Moraes', 'silvia22');
 </pre>
 
 # Simple Filter
@@ -82,6 +84,7 @@ File __/app/Controller/UsersController.php__
 <pre>
 function index() {
     
+    // Add filter
     $this->FilterResults->addFilters(
         array(
             'filter1' => array(
@@ -97,6 +100,7 @@ function index() {
     $this->FilterResults->setPaginate('order', 'User.name ASC'); // optional
     $this->FilterResults->setPaginate('limit', 10);              // optional
 
+    // Define conditions
     $this->FilterResults->setPaginate('conditions', $this->FilterResults->getConditions());
 
     $this->User->recursive = 0;
@@ -231,7 +235,7 @@ function index() {
         )
     );
     
-    // Add conditions in Paginate
+    // Define conditions
     $this->FilterResults->setPaginate('conditions', $this->FilterResults->getConditions());
 
     $this->User->recursive = 0;
@@ -262,7 +266,7 @@ function index() {
     // Add filter
     $this->FilterResults->addFilters('filter1');
     
-    // Add conditions in Paginate
+    // Define conditions
     $this->FilterResults->setPaginate('conditions', $this->FilterResults->getConditions());
 
     $this->User->recursive = 0;
@@ -310,7 +314,7 @@ echo $this->FilterForm->selectOperators('filter1',
     );
 
 echo $this->FilterForm->input('filter1');
-echo $this->FilterForm->end(__('Filtrar', true));
+echo $this->FilterForm->end(__('Filter', true));
 </pre>
 
 ## Operators
