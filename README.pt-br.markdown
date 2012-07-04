@@ -26,7 +26,10 @@ Edite o arquivo __/app/AppController.php__:
 <pre>
 var $components = array(
     'FilterResults.FilterResults' => array(
-        'autoPaginate' => false
+        'autoPaginate'       => false,
+        'autoLikeExplode'    => true,  // recomendado
+        'explodeChar'        => ' ',   // recomendado
+        'explodeConcatenate' => 'AND'  // recomendado (pode ser 'OR')
     )
 );
 
@@ -38,6 +41,7 @@ var $helpers = array(
 Parâmetros de configurações do componente:
 
 *   __autoPaginate:__ Se você definir como TRUE, o Paginate será configurado automaticamente.
+*   __autoLikeExplode:__ Se você definir como TRUE, o valor de pesquisa será quebrado pelo `explodeChar` e concatenado pela condição `explodeConcatenate`.
 
 # Utilização
 
@@ -110,6 +114,60 @@ $this->FilterForm->end();
 </pre>
 
 Pronto! Temos um campo que filtra o usuário pelo nome e compatível com o Paginate.
+
+E mais, o Filter Results automaticamente divide o valor de pesquisa para obter um melhor resultado. Por exemplo: se realizarmos um filtro por 'Pedro Elsner', a condição será: `WHERE ((User.name LIKE '%Pedro%') AND (User.name LIKE '%Elsner%'))`
+
+## Configurações de Quebra (Explode)
+
+A opção `explode` para os operadores `LIKE` e `NOT LIKE` estam ativadas por padrão nas configurações do Filter Results. Mas, como você sabe, você pode desativar na declaração dos components no controller. Se você fizer isto, você pode ativar a função `explode` para um filtro determinado:
+
+<pre>
+$this->FilterResults->addFilter(
+    array(
+        'filter1' => array(
+            'User.name' => array(
+                'operator' => 'LIKE',
+                'explode'  => true
+            )
+        )
+    )
+);
+</pre>
+
+Também é possível mudar as opções de quebra para cada um.
+
+<pre>
+$this->FilterResults->addFilter(
+    array(
+        'filter1' => array(
+            'User.name' => array(
+                'operator'           => 'LIKE',
+                'explode'            => true,
+                'explodeChar'        => '-',
+                'explodeConcatenate' => 'OR'
+            )
+        )
+    )
+);
+</pre>
+
+Além disso, você também pode usar a função de quebra junto com outro opedaroes (como `=`). Veja:
+
+<pre>
+$this->FilterResults->addFilter(
+    array(
+        'filter1' => array(
+            'User.name' => array(
+                'operator'           => '=',
+                'explode'            => true,
+                'explodeChar'        => '-',
+                'explodeConcatenate' => 'OR'
+            )
+        )
+    )
+);
+</pre>
+
 
 # Filtro Simples + Regra Composta
 

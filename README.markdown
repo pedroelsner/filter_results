@@ -41,8 +41,7 @@ var $helpers = array(
 Settings parameters:
 
 *   __autoPaginate:__ If you set TRUE, the Paginate will be configured automatically.
-*   __autoLikeExplode:__ If you set TRUE, the values will be explode by the `explodeChar` and concatenate like by `explodeConcatenate`.
-* * Example for follow settings: Filter User.name by 'Pedro Elsner': `WHERE ((User.name like '%Pedro%') AND (User.name like '%Elsner%'))`
+*   __autoLikeExplode:__ If you set TRUE, the filter value  will be explode by the `explodeChar` and concatenate by the condition `explodeConcatenate`.
 
 # Using the Component
 
@@ -116,18 +115,59 @@ $this->FilterForm->end();
 
 Ready! We have a field that filters the user by name and compatible with the Paginate.
 
-## Change Default Settings
+And more, the Filter Results automaticaly explode the filter value to gain a better results. For example: if we filter by 'Pedro Elsner', the condition will be: `WHERE ((User.name LIKE '%Pedro%') AND (User.name LIKE '%Elsner%'))`
 
-Sometimes you need change the default setting of Filter Results into determinate `action`. For this, use the follow code:
+## Explode Settings
+
+The option `explode` for operators `LIKE` and `NOT LIKE` is always enabled in the settings of the Filter Results. But, how do you know, you can disable it into components declaration in controller. If you do, you can enable the `explode` function for only the specified filter:
 
 <pre>
-$this->FilterResults->setAutoLikeExplode(false);
-
-// or
-
-$this->FilterResults->setExplodeChar('-');
-$this->FilterResults->setExplodeConcatenate('OR');
+$this->FilterResults->addFilter(
+    array(
+        'filter1' => array(
+            'User.name' => array(
+                'operator' => 'LIKE',
+                'explode'  => true
+            )
+        )
+    )
+);
 </pre>
+
+Too is possible to change the explode parameters for each filter.
+
+<pre>
+$this->FilterResults->addFilter(
+    array(
+        'filter1' => array(
+            'User.name' => array(
+                'operator'           => 'LIKE',
+                'explode'            => true,
+                'explodeChar'        => '-',
+                'explodeConcatenate' => 'OR'
+            )
+        )
+    )
+);
+</pre>
+
+Also, you can to use the explode function with any operator (like `=`). See:
+
+<pre>
+$this->FilterResults->addFilter(
+    array(
+        'filter1' => array(
+            'User.name' => array(
+                'operator'           => '=',
+                'explode'            => true,
+                'explodeChar'        => '-',
+                'explodeConcatenate' => 'OR'
+            )
+        )
+    )
+);
+</pre>
+
 
 # Simple Filter + Composite Rule
 
