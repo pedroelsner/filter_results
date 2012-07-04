@@ -23,7 +23,7 @@ App::uses('Component', 'Controller/Component');
  * @use        Component
  * @package    filter_results
  * @subpackage filter_results.filter_results
- * @link       http://www.github.com/pedroelsner/FilterResults2
+ * @link       http://www.github.com/pedroelsner/filter_results
  */
 class FilterResultsComponent extends Component {
     
@@ -259,11 +259,11 @@ class FilterResultsComponent extends Component {
     public function getConditions() {
 
         if (!is_array($this->_conditions)) {
-            return $this->make();
+            return self::make();
         }
 
         if (count($this->_conditions) == 0) {
-            return $this->make();
+            return self::make();
         }
 
         return $this->_conditions;
@@ -471,7 +471,7 @@ class FilterResultsComponent extends Component {
         
         if (isset($this->_options['filters'][$field])) {
             if (is_array($this->_options['filters'][$field])) {
-                $values += $this->_foreachFieldForValues($this->_options['filters'][$field]);
+                $values += self::_foreachFieldForValues($this->_options['filters'][$field]);
             }
         }
         
@@ -498,7 +498,7 @@ class FilterResultsComponent extends Component {
                 }
             } else {
                 if (is_array($value)) {
-                    $result += $this->_foreachFieldForValues($value);
+                    $result += self::_foreachFieldForValues($value);
                 }
             }
         }
@@ -526,17 +526,34 @@ class FilterResultsComponent extends Component {
     
 
 /**
+ * Values
+ *
+ * @static
+ * @param string $label
+ * @param array $values
+ * @return array
+ * @since  2.0
+ */
+    public function values($label, $values) {
+        return self::merge($label, $values);
+    }
+
+
+/**
  * Merge
  *
- * @param string $default
- * @param array $options
+ * DEPRECATED IN 04/07/2012
+ * 
+ * @param string $label
+ * @param array $values
  * @return array
  * @access public
+ * @deprecated 04/07/2012
  * @since  1.0
  */
-    public function merge($default, $options = null) {
-        $return   = array('' => $default);
-        $return[] = $options;
+    public function merge($label, $values) {
+        $return   = array('' => $label);
+        $return[] = $values;
         return $return;
     }
 
@@ -572,10 +589,12 @@ class FilterResultsComponent extends Component {
 /**
  * Make
  *
+ * DEPRECATED IN 04/07/2012
  * Gera o array 'conditions' para o componente 'Paginator' do Controller
  *
- * @return array Conditions for method find() or pagiante()
+ * @return array Conditions para um método find() or paginate()
  * @access public
+ * @deprecated 04/07/2012
  * @since  1.0
  */
     public function make() {
@@ -607,10 +626,10 @@ class FilterResultsComponent extends Component {
             foreach ($this->controller->request->data[$this->_options['prefix']] as $key => $value) {
 
                 if (!is_array($value)) {
-                    $url[$this->_encrypt(sprintf('%s.%s', $this->_options['prefix'], $key))] = $this->_encrypt($value);
+                    $url[self::_encrypt(sprintf('%s.%s', $this->_options['prefix'], $key))] = self::_encrypt($value);
                 } else {
                     foreach ($value as $k => $v) {
-                        $url[$this->_encrypt(sprintf('%s.%s.%s', $this->_options['prefix'], $key, $k))] = $this->_encrypt($v);
+                        $url[self::_encrypt(sprintf('%s.%s.%s', $this->_options['prefix'], $key, $k))] = self::_encrypt($v);
                     }
                 }
             }
@@ -634,12 +653,12 @@ class FilterResultsComponent extends Component {
         /**
          * Se houver parametros gera 'conditions' para o filtro
          */
-        if (count($this->controller->params['named']) == 0) {
+        if (count($this->controller->request->params['named']) == 0) {
             return array();
         }
         
-        if ($this->_check() > 0) {
-            $this->_conditions = $this->_filterFields();
+        if (self::_check() > 0) {
+            $this->_conditions = self::_filterFields();
             if ($this->_options['autoPaginate']) {
                 $this->controller->Paginator->paginate['conditions'][] = $this->_conditions;
             }
@@ -664,8 +683,8 @@ class FilterResultsComponent extends Component {
         
         // Tira criptografia de todos os parametros
         // e grava em variavel local
-        foreach ($this->controller->params['named'] as $key => $value) {
-            $this->_params[$this->_decrypt($key)] = $this->_decrypt($value);
+        foreach ($this->controller->request->params['named'] as $key => $value) {
+            $this->_params[self::_decrypt($key)] = self::_decrypt($value);
         }
         
         // Variável privada que conta campos encontrados
@@ -697,8 +716,8 @@ class FilterResultsComponent extends Component {
         
         foreach ($this->_options['filters'] as $key => $value) {
             $result += (is_array($value))
-                     ? $this->_makeConditions($key, $value)
-                     : $this->_makeConditions($value);
+                     ? self::_makeConditions($key, $value)
+                     : self::_makeConditions($value);
         }
         
         return $result;
@@ -717,7 +736,6 @@ class FilterResultsComponent extends Component {
  */
     protected function _makeConditions($field, $options = null) {
         
-        // Array privado da função
         $condition = array();
         
         
@@ -725,7 +743,7 @@ class FilterResultsComponent extends Component {
          * Campo sem nenhum parâmetro
          */
         if (!isset($options)) {
-            return $this->_makeConditionsWithoutOptions($field);
+            return self::_makeConditionsWithoutOptions($field);
         }
         
         
@@ -739,45 +757,58 @@ class FilterResultsComponent extends Component {
                 case 'and':
                 case 'or':
                     $condition += array(
-                        $key => $this->_makeConditions($field, $option)
+                        $key => self::_makeConditions($field, $option)
                     );
                     break;
                 
                 default:
                     
-                    $fieldModel = (is_array($option)) ? $fieldModel = $key : $fieldModel = $option;
+                    $fieldModel = (is_array($option))
+                                ? $key
+                                : $option;
                     
                     /**
                      * Verifica se parametros do fieldModel foram enviados
                      */
                     if (isset($this->_params[sprintf('%s.%s', $this->_options['prefix'], $field)])) {
 
-                        $operator = (isset($options[$fieldModel]['operator'])) ? $options[$fieldModel]['operator'] : '=';
+                        $operator = (isset($options[$fieldModel]['operator']))
+                                  ? $options[$fieldModel]['operator']
+                                  : '=';
                         
+
                         if (isset($options[$fieldModel]['value'])) {
-                            $value = (is_array($options[$fieldModel]['value'])) ? $this->_params[sprintf('%s.%s', $this->_options['prefix'], $field)] : $options[$fieldModel]['value'];
+
+                            $value = (is_array($options[$fieldModel]['value']))
+                                   ? $this->_params[sprintf('%s.%s', $this->_options['prefix'], $field)]
+                                   : $options[$fieldModel]['value'];
+
                         } else {
                             $value = $this->_params[sprintf('%s.%s', $this->_options['prefix'], $field)];
                         }
 
-                        // Sai se não houver valor
+
+                        /**
+                         * Para se não houver valor
+                         */
                         if (empty($value)) {
                             return array();
                         }
 
 
-                        if ($operator == 'BETWEEN') {
-                            $condition += $this->_conditionsForOperatorBetween($field, $options, $fieldModel, $operator, $value);
+                        if (mb_strtolower($operator, 'utf-8') == 'between') {
+                            $condition += self::_conditionsForOperatorBetween($field, $options, $fieldModel, $operator, $value);
+
                         } else {
 
-                            $beforeValue = $this->_defaultOptionsValue($operator, $options, $fieldModel, 'beforeValue');
-                            $afterValue  = $this->_defaultOptionsValue($operator, $options, $fieldModel, 'afterValue');
+                            $beforeValue = self::_defaultOptionsValue($operator, $options, $fieldModel, 'beforeValue');
+                            $afterValue  = self::_defaultOptionsValue($operator, $options, $fieldModel, 'afterValue');
 
-                            $explodeChar        = $this->_defaultOptionsExplode($operator, $options, $fieldModel, 'explodeChar');
-                            $explodeConcatenate = $this->_defaultOptionsExplode($operator, $options, $fieldModel, 'explodeConcatenate');
+                            $explodeChar        = self::_defaultOptionsExplode($operator, $options, $fieldModel, 'explodeChar');
+                            $explodeConcatenate = self::_defaultOptionsExplode($operator, $options, $fieldModel, 'explodeConcatenate');
 
-                            if ($this->__isMayExplodeValue($operator, $options, $fieldModel)) {
-                                $condition += $this->_valueConcatenate($fieldModel, $operator, $explodeChar, $explodeConcatenate, $value, $beforeValue, $afterValue);
+                            if (self::__isMayExplodeValue($operator, $options, $fieldModel)) {
+                                $condition += self::_valueConcatenate($fieldModel, $operator, $explodeChar, $explodeConcatenate, $value, $beforeValue, $afterValue);
                             } else {
                                 $condition += array(
                                     sprintf('%s %s', $fieldModel, $operator) => sprintf('%s%s%s', $beforeValue, $value, $afterValue)
@@ -810,7 +841,9 @@ class FilterResultsComponent extends Component {
  */
     protected function _defaultOptionsValue($operator, $options, $fieldModel, $optionValue) {
 
-        $default = (isset($options[$fieldModel][$optionValue])) ? $options[$fieldModel][$optionValue] : '';
+        $default = (isset($options[$fieldModel][$optionValue]))
+                 ? $options[$fieldModel][$optionValue]
+                 : '';
 
         if (!$default) {
             if (mb_strtolower($operator, 'utf-8') == 'like' || mb_strtolower($operator, 'utf-8') == 'not like') {
@@ -891,7 +924,9 @@ class FilterResultsComponent extends Component {
  */
     protected function _conditionsForOperatorBetween($field, $options, $fieldModel, $operator, $value) {
 
-        // Verifica a existencia dos dois parâmetros
+        /**
+         * Verifica a existencia dos dois parâmetros
+         */ 
         if(!isset($this->_params[sprintf('%s.%s', $this->_options['prefix'], $field)]) || !isset($this->_params[sprintf('%s.%s2', $this->_options['prefix'], $field)])) {
                                 
             if (isset($this->_params[sprintf('%s.%s', $this->_options['prefix'], $field)])) {
@@ -904,13 +939,16 @@ class FilterResultsComponent extends Component {
 
             return array();
         }
-                            
-                            
+
+
         $value2 = $this->_params[sprintf('%s.%s2', $this->_options['prefix'], $field)];
-                           
-        // Altera o formato da data para formato de banco
+        
+
+        /** 
+         * Altera o formato da data para formato de banco
+         */
         if(isset($options[$fieldModel]['convertDate']) && $options[$fieldModel]['convertDate']) {
-            $value = implode(preg_match("~\/~", $value) == 0 ? "/" : "-", array_reverse(explode(preg_match("~\/~", $value) == 0 ? "-" : "/", $value)));
+            $value  = implode(preg_match("~\/~", $value)  == 0 ? "/" : "-", array_reverse(explode(preg_match("~\/~", $value)  == 0 ? "-" : "/", $value)));
             $value2 = implode(preg_match("~\/~", $value2) == 0 ? "/" : "-", array_reverse(explode(preg_match("~\/~", $value2) == 0 ? "-" : "/", $value2)));
         }
                             
@@ -961,8 +999,8 @@ class FilterResultsComponent extends Component {
                 
         if (!isset($this->_params[sprintf('%s.%s.%s', $this->_options['prefix'], $this->_options['operator'], $field)])) {
             $operator    = 'like';
-            $beforeValue = $this->_defaultOptionsValue($operator, $this->_options, $fieldModel, 'beforeValue');
-            $afterValue  = $this->_defaultOptionsValue($operator, $this->_options, $fieldModel, 'afterValue');
+            $beforeValue = self::_defaultOptionsValue($operator, $this->_options, $fieldModel, 'beforeValue');
+            $afterValue  = self::_defaultOptionsValue($operator, $this->_options, $fieldModel, 'afterValue');
             $beforeValue = '%';
             $afterValue  = '%';
         } else {
@@ -977,11 +1015,13 @@ class FilterResultsComponent extends Component {
                     break;
                     
                 case 'likebegin':
+                case 'like begin':
                     $operator   = 'LIKE';
                     $afterValue = '%';
                     break;
                     
                 case 'likeend':
+                case 'like end':
                     $operator    = 'LIKE';
                     $beforeValue = '%';
             }
@@ -990,8 +1030,8 @@ class FilterResultsComponent extends Component {
         }
 
             
-        if ($this->__isMayExplodeValue($operator)) {
-            $condition = $this->_valueConcatenate($fieldModel, $operator, $value, $beforeValue, $afterValue);
+        if (self::__isMayExplodeValue($operator)) {
+            $condition = self::_valueConcatenate($fieldModel, $operator, $value, $beforeValue, $afterValue);
         } else {
             $condition = array(
                 sprintf('%s %s', $fieldModel, $operator) => sprintf('%s%s%s', $beforeValue, $value, $afterValue)

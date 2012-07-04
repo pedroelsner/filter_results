@@ -14,33 +14,24 @@
  */
 
 
+App::uses('FormHelper', 'View/Helper');
+
 /**
  * Filter Form Helper
  *
  * @use        AppHelper
  * @package    filter_results
  * @subpackage filter_results.filter_form
- * @link       http://www.github.com/pedroelsner/FilterResults2
+ * @link       http://www.github.com/pedroelsner/filter_results
  */
-class FilterFormHelper extends AppHelper
-{
-
-/**
- * Helper auxiliar
- *
- * @var array
- * @access public
- */
-    var $helpers = array(
-        'Form'
-    );
-    
+class FilterFormHelper extends FormHelper {  
     
 /**
  * Guarda referencia para o Componente 'Filter Results'
  *
  * @var object
  * @access private
+ * @since 1.0
  */
     private $_component;
     
@@ -52,15 +43,9 @@ class FilterFormHelper extends AppHelper
  *
  * @param object $component Referencia ao componente 'Filter Results'
  * @access protected
+ * @since 1.0
  */
-    protected function _setup(&$component)
-    {
-        if ( !(is_object($component)) )
-        {
-            debug('Erro: FilterResults::Helper::Load()');
-            return;
-        }
-        
+    protected function _setup(FilterResultsComponent $component) {
         $this->_component = $component;
     }
     
@@ -72,9 +57,9 @@ class FilterFormHelper extends AppHelper
  *
  * @return boolean
  * @access protected
+ * @since 1.0
  */
-    protected function _hasComponent()
-    {
+    protected function _hasComponent() {
         return (is_object($this->_component)) ? true : false;
     }
     
@@ -82,23 +67,21 @@ class FilterFormHelper extends AppHelper
 /**
  * Create
  *
- * @param object $controller
+ * @param object $component
  * @param array $settings
  * @return string
  * @access public
+ * @since  1.0
  */
-    public function create(&$controller, $settings = array())
-    {
+    public function create(FilterResultsComponent $component, $settings = array()) {
         
-        $this->_setup($controller);
+        self::_setup($component);
         
-        if ( !($this->_hasComponent()) )
-        {
-            return;
+        if (!self::_hasComponent()) {
+            return '';
         }
         
-        if ( !(is_array($settings)) )
-        {
+        if (!is_array($settings)) {
             $settings = array();
         }
         
@@ -112,8 +95,8 @@ class FilterFormHelper extends AppHelper
         
         $settings = array_merge($settings, $default);
         $settings = array_merge($settings, $this->_component->getFormOptions());
-        echo $this->Form->create(null, $settings);
         
+        return parent::create(null, $settings);
     }
     
     
@@ -124,15 +107,15 @@ class FilterFormHelper extends AppHelper
  * @param array $settings
  * @return string
  * @access public
+ * @since 1.0
  */
-    public function end($submit = null, $settings = array())
-    {
-        if ( !($this->_hasComponent()) )
-        {
-            return;
+    public function end($submit = null, $settings = array()) {
+
+        if (!self::_hasComponent()) {
+            return '';
         }
         
-        echo $this->Form->end($submit, $settings);
+        return parent::end($submit, $settings);
     }
     
     
@@ -143,15 +126,15 @@ class FilterFormHelper extends AppHelper
  * @param array $settings
  * @return string
  * @access public
+ * @since 1.0
  */
-    public function submit($name, $settings = array())
-    {
-        if ( !($this->_hasComponent()) )
-        {
-            return;
+    public function submit($name, $settings = array()) {
+
+        if (!self::_hasComponent()) {
+            return '';
         }
         
-        echo $this->Form->submit($name, $settings);
+        return parent::submit($name, $settings);
         
     }
     
@@ -163,38 +146,32 @@ class FilterFormHelper extends AppHelper
  * @param array $settings
  * @return string
  * @access public
+ * @since 1.0
  */
-    public function input($name, $settings = array())
-    {
-        if ( !($this->_hasComponent()) )
-        {
-            return;
+    public function input($name, $settings = array()) {
+
+        if (!self::_hasComponent()) {
+            return '';
         }
         
-        if ( !($this->_component->hasField($name)) )
-        {
-            return;
+        if (!$this->_component->hasField($name)) {
+            return '';
         }
         
         
         $settings['options'] = $this->_component->getFieldValues($name);
 
+        $input = parent::input(sprintf('%s.%s', $this->_component->getPrefix(), $name), $settings);
 
         /**
-         * POR VINICIUS ARANTES 
          * Gera 2 campos para considção 'BETWEEN'
-         */    
-        if($this->_component->getOperation($name) == 'BETWEEN') 
-        {
-            echo $this->Form->input(sprintf('%s.%s', $this->_component->getPrefix(), $name), $settings)
-               . " "
-               . $this->Form->input(sprintf('%s.%s2', $this->_component->getPrefix(), $name), $settings);
-        }
-        else
-        {
-            echo $this->Form->input(sprintf('%s.%s', $this->_component->getPrefix(), $name), $settings);    
+         */ 
+        if(mb_strtolower($this->_component->getOperation($name), 'utf-8') == 'between') {
+            $input .= (isset($setting['between'])) ? $setting['between'] : ' ';
+            $input .= parent::input(sprintf('%s.%s2', $this->_component->getPrefix(), $name), $settings);
         }
         
+        return $input;
     }
     
     
@@ -208,27 +185,25 @@ class FilterFormHelper extends AppHelper
  * @param array $settings
  * @return string
  * @access public
+ * @since 1.0
  */
-    public function selectOperators($name, $options = null, $settings = array())
-    {    
-        if ( !($this->_hasComponent()) )
-        {
-            return;
+    public function selectOperators($name, $options = null, $settings = array()) {
+
+        if (!self::_hasComponent()) {
+            return '';
         }
         
-        if ( !($this->_component->hasField($name)) )
-        {
-            return;
+        if (!$this->_component->hasField($name)) {
+            return '';
         }
         
         
-        if ( !(is_array($options)) )
-        {
+        if (!is_array($options)) {
             $options = array(
-                'LIKE' => __('contendo', true),
-                'NOT LIKE' => __('não contendo', true),
-                'LIKEbegin' => 'começando com',
-                'LIKEend'   => 'terminando com',
+                'LIKE'       => __('contendo', true),
+                'NOT LIKE'   => __('não contendo', true),
+                'LIKE BEGIN' => __('começando com', true),
+                'LIKE END'   => __('terminando com', true),
                 '='    => __('iqual a', true),
                 '!='   => __('diferente de', true),
                 '>'    => __('maior que', true),
@@ -238,14 +213,14 @@ class FilterFormHelper extends AppHelper
             );
         }
         
-        if ( !(is_array($settings)) )
-        {
+        if (!is_array($settings)) {
             $settings = array();
         }
         
         
         $settings['options'] = $options;
-        echo $this->Form->input(sprintf('%s.%s.%s', $this->_component->getPrefix(), $this->_component->getOperator(), $name), $settings);
+        
+        return parent::input(sprintf('%s.%s.%s', $this->_component->getPrefix(), $this->_component->getOperator(), $name), $settings);
         
     }
     
@@ -259,33 +234,30 @@ class FilterFormHelper extends AppHelper
  * @param array $settings
  * @return string
  * @access public
+ * @since 1.0
  */
-    public function selectFields($name, $options = null, $settings = null)
-    {
-        if ( !($this->_hasComponent()) )
-        {
-            return;
+    public function selectFields($name, $options = null, $settings = null) {
+
+        if (!$this->_hasComponent()) {
+            return '';
         }
         
-        if ( !($this->_component->hasField($name)) )
-        {
-            return;
+        if (!$this->_component->hasField($name)) {
+            return '';
         }
         
         
-        if ( !(is_array($options)) )
-        {
+        if (!is_array($options)) {
             $options = $this->_component->getModelFields();
         }
         
-        if ( !(is_array($settings)) )
-        {
+        if (!is_array($settings)) {
             $settings = array();
         }
         
         $settings['options'] = $options;
-        echo $this->Form->input(sprintf('%s.%s.%s', $this->_component->getPrefix(), $this->_component->getFieldModel(), $name), $settings);
-        
+
+        return self::input(sprintf('%s.%s.%s', $this->_component->getPrefix(), $this->_component->getFieldModel(), $name), $settings);
     }
     
 }

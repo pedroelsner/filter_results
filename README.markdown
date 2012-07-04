@@ -70,6 +70,8 @@ CREATE TABLE users (
     FOREIGN KEY(group_id) REFERENCES groups(id),
     UNIQUE(username)
 ) ENGINE=INNODB;
+
+
 </pre>
 
 # Simple Filter
@@ -92,9 +94,10 @@ function index() {
         )
     );
 
-    $this->FilterResults->setPaginate('order', 'User.name ASC');
-    $this->FilterResults->setPaginate('limit', 10);
-    $this->FilterResults->setPaginate('conditions', $this->FilterResults->make());
+    $this->FilterResults->setPaginate('order', 'User.name ASC'); // optional
+    $this->FilterResults->setPaginate('limit', 10);              // optional
+
+    $this->FilterResults->setPaginate('conditions', $this->FilterResults->getConditions());
 
     $this->User->recursive = 0;
     $this->set('users', $this->paginate());
@@ -107,10 +110,9 @@ Now we just have to make the form on View at the top of the table.
 
 File __/app/View/Users/index.ctp)__
 <pre>
-$this->FilterForm->create($FilterResults);
-$this->FilterForm->input('filter1');
-$this->FilterForm->submit(__('Filtrar', true));
-$this->FilterForm->end();
+echo $this->FilterForm->create($FilterResults);
+echo $this->FilterForm->input('filter1');
+echo $this->FilterForm->end(__('Filter', true));
 </pre>
 
 Ready! We have a field that filters the user by name and compatible with the Paginate.
@@ -178,17 +180,9 @@ File __/app/Controller/UsersController.php__
 $this->FilterResults->addFilters(
     array(
         'filter1' => array(
-            'OR' => array( // REGRA "OU"
-                'User.name' => array(
-                    'operator'    => 'LIKE',
-                    'beforeValue' => '%',
-                    'afterValue'  => '%'
-                ),
-                'User.username' => array(
-                    'operator'    => 'LIKE',
-                    'beforeValue' => '%',
-                    'afterValue'  => '%'
-                )
+            'OR' => array(
+                'User.name'     => array('operator' => 'LIKE'),
+                'User.username' => array('operator' => 'LIKE')
             )
         )
     )
@@ -208,14 +202,8 @@ File __/app/Controller/UsersController.php__
 $this->FilterResults->addFilters(
     array(
         'filter1' => array(
-            'User.name' => array(
-                'operator'    => 'LIKE',
-                'beforeValue' => '%',
-                'afterValue'  => '%'
-            ),
-            'User.active' => array(
-                'value' => '1'
-            )
+            'User.name'   => array('operator' => 'LIKE'),
+            'User.active' => array('value'    => '1')
         )
     )
 );
@@ -229,26 +217,22 @@ File __/app/Controller/UsersController.php__
 <pre>
 function index() {
     
+    // Add filter
     $this->FilterResults->addFilters(
         array(
             'filter1' => array(
-                'User.name' => array(
-                    'operator'    => 'LIKE',
-                    'beforeValue' => '%',
-                    'afterValue'  => '%'
-                )
+                'User.name' => array('operator' => 'LIKE')
             ),
             'filter2' => array(
                 'User.group_id' => array(
-                    'value' => $this->FilterResults->merge('Grupo' ,$this->User->Group->find('list'))
+                    'value' => $this->FilterResults->values('Grupo', $this->User->Group->find('list'))
                 )
             )
         )
     );
     
-    $this->FilterResults->setPaginate('order', 'User.name ASC');
-    $this->FilterResults->setPaginate('limit', 10);
-    $this->FilterResults->setPaginate('conditions', $this->FilterResults->make());
+    // Add conditions in Paginate
+    $this->FilterResults->setPaginate('conditions', $this->FilterResults->getConditions());
 
     $this->User->recursive = 0;
     $this->set('users', $this->paginate());
@@ -257,11 +241,10 @@ function index() {
 
 File __/app/View/Users/index.ctp__
 <pre>
-$this->FilterForm->create($FilterResults);
-$this->FilterForm->input('filter2', array('class' => 'select-box'));
-$this->FilterForm->input('filter1');
-$this->FilterForm->submit(__('Filtrar', true));
-$this->FilterForm->end();
+echo $this->FilterForm->create($FilterResults);
+echo $this->FilterForm->input('filter2', array('class' => 'select-box'));
+echo $this->FilterForm->input('filter1');
+echo $this->FilterForm->end(__('Filter', true));
 </pre>
 
 Ready! Use and abuse of those filters you want.
@@ -276,11 +259,11 @@ File __/app/Controller/UsersController.php__
 <pre>
 function index() {
     
-    $this->FilterResults->addFilters(array('filter1'));
+    // Add filter
+    $this->FilterResults->addFilters('filter1');
     
-    $this->FilterResults->setPaginate('order', 'User.name ASC');
-    $this->FilterResults->setPaginate('limit', 10);
-    $this->FilterResults->setPaginate('conditions', $this->FilterResults->make());
+    // Add conditions in Paginate
+    $this->FilterResults->setPaginate('conditions', $this->FilterResults->getConditions());
 
     $this->User->recursive = 0;
     $this->set('users', $this->paginate());
@@ -291,12 +274,11 @@ NOTE: Note that this time we filter `filter1` without any parameters. This is be
 
 File __/app/View/Users/index.ctp__
 <pre>
-$this->FilterForm->create($FilterResults);
-$this->FilterForm->selectFields('filter1', null, array('class' => 'select-box'));
-$this->FilterForm->selectOperators('filter1');
-$this->FilterForm->input('filter1');
-$this->FilterForm->submit(__('Filtrar', true));
-$this->FilterForm->end();
+echo $this->FilterForm->create($FilterResults);
+echo $this->FilterForm->selectFields('filter1', null, array('class' => 'select-box'));
+echo $this->FilterForm->selectOperators('filter1');
+echo $this->FilterForm->input('filter1');
+echo $this->FilterForm->end(__('Filter', true));
 </pre>
 
 Now, you can first select the field (automatically the Filter Results table lists the fields), then inform the operator and the desired value for the filter.
@@ -307,28 +289,28 @@ For this, we change only the View.
 
 Arquivo __/app/View/Users/index.ctp__
 <pre>
-$this->FilterForm->create($FilterResults);
-$this->FilterForm->selectFields(
-    'filter1',
-    array(
-        'User.id'       => __('ID', true),
-        'User.name'     => __('Nome', true),
-        'User.username' => __('Usuário', true),
-    ),
-    array(
-        'class' => 'select-box'
-    )
-);
-$this->FilterForm->selectOperators(
-    'filter1',
-    array(
-        'LIKE' => __('Contendo', true),
-        '='    => __('Igual a', true)
-    )
-);
-$this->FilterForm->input('filter1');
-$this->FilterForm->submit(__('Filtrar', true));
-$this->FilterForm->end();
+echo $this->FilterForm->create($FilterResults);
+
+echo $this->FilterForm->selectFields('filter1',
+        array(
+            'User.id'       => __('ID', true),
+            'User.name'     => __('Name', true),
+            'User.username' => __('Username', true),
+        ),
+        array(
+            'class' => 'select-box'
+        )
+    );
+
+echo $this->FilterForm->selectOperators('filter1',
+        array(
+            'LIKE' => __('containing', true),
+            '='    => __('equal to', true)
+        )
+    );
+
+echo $this->FilterForm->input('filter1');
+echo $this->FilterForm->end(__('Filtrar', true));
 </pre>
 
 ## Operators
@@ -337,30 +319,28 @@ The Filter results have pre-defined operators, below you will find all the optio
 
 <pre>
 array(
-    'LIKE'      => __('contendo', true),
-    'NOT LIKE'  => __('não contendo', true),
-    'LIKEbegin' => __('começando com', true),
-    'LIKEend'   => __('terminando com', true),
-    '='  => __('iqual a', true),
-    '!=' => __('diferente de', true),
-    '>'  => __('maior que', true),
-    '>=' => __('maior ou igual', true),
-    '<'  => __('menor que', true),
-    '<=' => __('menor ou igual', true)
+    'LIKE'       => __('containing', true),
+    'NOT LIKE'   => __('not containing', true),
+    'LIKE BEGIN' => __('starting with', true),
+    'LIKE END'   => __('ending with', true),
+    '='  => __('equal to', true),
+    '!=' => __('different', true),
+    '>'  => __('greater than', true),
+    '>=' => __('greater or equal to', true),
+    '<'  => __('less than', true),
+    '<=' => __('less or equal to', true)
 );
 </pre>
 
-# Operator BETWEEN
+# BETWEEN
 
-Now is possible too use the operator `BETWEEN` in FilterResults:
+For to use the operator `BETWEEN` in FilterResults:
 
 <pre>
 $this->FilterResults->addFilters(
     array(
         'filter1' => array(
-            'User.id' => array(
-                'operator'    => 'BETWEEN'
-            )
+            'User.id' => array('operator' => 'BETWEEN')
         )
     )
 );
@@ -376,3 +356,4 @@ Licensed under Creative Commons 3.0 (http://creativecommons.org/licenses/by/3.0/
 ## Thanks
 
 * Vinícius Arantes (vinicius.big@gmail.com)
+* Francy Reymer (francys.reymer@gmail.com)
