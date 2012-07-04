@@ -321,10 +321,10 @@ O Filter Resultes possuí operadores pré-definidos, abaixo você encontra todas
 
 <pre>
 array(
-    'LIKE'      => __('contendo', true),
-    'NOT LIKE'  => __('não contendo', true),
-    'LIKEbegin' => __('começando com', true),
-    'LIKEend'   => __('terminando com', true),
+    'LIKE'       => __('contendo', true),
+    'NOT LIKE'   => __('não contendo', true),
+    'LIKE BEGIN' => __('começando com', true),
+    'LIKE END'   => __('terminando com', true),
     '='  => __('iqual a', true),
     '!=' => __('diferente de', true),
     '>'  => __('maior que', true),
