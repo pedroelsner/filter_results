@@ -376,7 +376,7 @@ class FilterResultsComponent extends Component {
         if (!is_string($explodeConcatenate)) {
             throw new Exception('$autoLikeExplode type must be string');
         }
-        
+
         if (mb_strtolower($explodeConcatenate, 'utf-8') != 'AND' &&  mb_strtolower($explodeConcatenate, 'utf-8') != 'OR') {
             throw new Exception("$autoLikeExplode must be: 'AND' or 'OR'");
         }
@@ -526,7 +526,7 @@ class FilterResultsComponent extends Component {
  * @since  1.0
  */
     public function merge($default, $options = null) {
-        $return = array('' => $default);
+        $return   = array('' => $default);
         $return[] = $options;
         return $return;
     }
@@ -683,7 +683,9 @@ class FilterResultsComponent extends Component {
         $result = array();
         
         foreach ($this->_options['filters'] as $key => $value) {
-            $result += (is_array($value)) ? $this->_makeConditions($key, $value) : $this->_makeConditions($value);
+            $result += (is_array($value))
+                     ? $this->_makeConditions($key, $value)
+                     : $this->_makeConditions($value);
         }
         
         return $result;
@@ -737,7 +739,7 @@ class FilterResultsComponent extends Component {
                      */
                     if (isset($this->_params[sprintf('%s.%s', $this->_options['prefix'], $field)])) {
 
-                        $operator = (isset($options[$fieldModel]['operator'])) ? $options[$fieldModel]['operator'] : '';
+                        $operator = (isset($options[$fieldModel]['operator'])) ? $options[$fieldModel]['operator'] : '=';
                         
                         if (isset($options[$fieldModel]['value'])) {
                             $value = (is_array($options[$fieldModel]['value'])) ? $this->_params[sprintf('%s.%s', $this->_options['prefix'], $field)] : $options[$fieldModel]['value'];
@@ -755,11 +757,14 @@ class FilterResultsComponent extends Component {
                             $condition += $this->_conditionsForOperatorBetween($field, $options, $fieldModel, $operator, $value);
                         } else {
 
-                            $beforeValue = (isset($options[$fieldModel]['beforeValue'])) ? $options[$fieldModel]['beforeValue'] : '';
-                            $afterValue = (isset($options[$fieldModel]['afterValue'])) ? $options[$fieldModel]['afterValue'] : '';
+                            $beforeValue = $this->_defaultOptionsValue($operator, $options, $fieldModel, 'beforeValue');
+                            $afterValue  = $this->_defaultOptionsValue($operator, $options, $fieldModel, 'afterValue');
 
-                            if ($this->__isMayExplodeValue($operator)) {
-                                $condition += $this->_valueConcatenate($fieldModel, $operator, $value, $beforeValue, $afterValue);
+                            $explodeChar        = $this->_defaultOptionsExplode($operator, $options, $fieldModel, 'explodeChar');
+                            $explodeConcatenate = $this->_defaultOptionsExplode($operator, $options, $fieldModel, 'explodeConcatenate');
+
+                            if ($this->__isMayExplodeValue($operator, $options, $fieldModel)) {
+                                $condition += $this->_valueConcatenate($fieldModel, $operator, $explodeChar, $explodeConcatenate, $value, $beforeValue, $afterValue);
                             } else {
                                 $condition += array(
                                     sprintf('%s %s', $fieldModel, $operator) => sprintf('%s%s%s', $beforeValue, $value, $afterValue)
@@ -780,21 +785,80 @@ class FilterResultsComponent extends Component {
 
 
 /**
+ * Default Options Value
+ * 
+ * @param string $operator
+ * @param array $options
+ * @param string $fieldModel
+ * @param string $optionValue
+ * @return string
+ * @access protected
+ * @since 2.0
+ */
+    protected function _defaultOptionsValue($operator, $options, $fieldModel, $optionValue) {
+
+        $default = (isset($options[$fieldModel][$optionValue])) ? $options[$fieldModel][$optionValue] : '';
+
+        if (!$default) {
+            if (mb_strtolower($operator, 'utf-8') == 'like' || mb_strtolower($operator, 'utf-8') == 'not like') {
+                $default = '%';
+            }
+        }
+
+        return $default;
+    }
+
+
+/**
+ * Default Options Explode
+ * 
+ * @param string $operator
+ * @param array $options
+ * @param string $fieldModel
+ * @param string $optionExplode
+ * @return string
+ * @access protected
+ * @since 2.0
+ */
+    protected function _defaultOptionsExplode($operator, $options, $fieldModel, $optionExplode) {
+
+        return (isset($options[$fieldModel][$optionExplode]))
+             ? $options[$fieldModel][$optionExplode]
+             : $this->_options[$optionExplode];
+    }
+
+
+/**
  * Is May Explode Value
  * 
  * Função que verifica a possíbilidade de "explodir" o valor
  * 
  * @param string $operator
+ * @param array $options
  * @return boolean
  * @access private
  * @since 2.0
  */
-    private function __isMayExplodeValue($operator) {
+    private function __isMayExplodeValue($operator, $options, $fieldModel) {
 
-        if (mb_strtolower($operator, 'utf-8') == 'like' || mb_strtolower($operator, 'utf-8') == 'not like') {
-            if ($this->_options['autoLikeExplode']) {
-                return true;
+        $fieldOption = (isset($options[$fieldModel]['explode']))
+                     ? $options[$fieldModel]['explode']
+                     : null;
+
+        $fieldOption = (is_bool($fieldOption))
+                     ? $fieldOption
+                     : null;
+
+        if (is_null($fieldOption)) {
+            if (mb_strtolower($operator, 'utf-8') == 'like' || mb_strtolower($operator, 'utf-8') == 'not like') {
+                if ($this->_options['autoLikeExplode']) {
+                    return true;
+                }
             }
+        }
+
+        if($fieldOption) {
+            return true;
         }
 
         return false;
@@ -838,11 +902,11 @@ class FilterResultsComponent extends Component {
         }
                             
                             
-        $value = array($value, $value2);
-        $operator = 'BETWEEN ? AND ?';
+        $value     = array($value, $value2);
+        $operator  = 'BETWEEN ? AND ?';
         $condition = array(sprintf('%s %s', $fieldModel, $operator) => $value);
                             
-        $$this->controller->request->data[$this->_options['prefix']][$field] = $this->_params[sprintf('%s.%s', $this->_options['prefix'], $field)];
+        $$this->controller->request->data[$this->_options['prefix']][$field]     = $this->_params[sprintf('%s.%s', $this->_options['prefix'], $field)];
         $$this->controller->request->data[$this->_options['prefix']][$field.'2'] = $this->_params[sprintf('%s.%s2', $this->_options['prefix'], $field)];
 
         return $condition;
@@ -873,15 +937,21 @@ class FilterResultsComponent extends Component {
         /**
          * Define valores padrões
          */
-        $fieldModel = $this->_params[sprintf('%s.%s.%s', $this->_options['prefix'], $this->_options['fieldModel'], $field)];
-        $value = $this->_params[sprintf('%s.%s', $this->_options['prefix'], $field)];
+        $fieldModel  = $this->_params[sprintf('%s.%s.%s', $this->_options['prefix'], $this->_options['fieldModel'], $field)];
+        $value       = $this->_params[sprintf('%s.%s', $this->_options['prefix'], $field)];
         $beforeValue = '';
-        $afterValue = '';
+        $afterValue  = '';
+
+        $explodeChar        = $this->_options['explodeChar'];
+        $explodeConcatenate = $this->_options['explodeConcatenate'];
+
                 
         if (!isset($this->_params[sprintf('%s.%s.%s', $this->_options['prefix'], $this->_options['operator'], $field)])) {
-            $operator = 'LIKE';
+            $operator    = 'like';
+            $beforeValue = $this->_defaultOptionsValue($operator, $this->_options, $fieldModel, 'beforeValue');
+            $afterValue  = $this->_defaultOptionsValue($operator, $this->_options, $fieldModel, 'afterValue');
             $beforeValue = '%';
-            $afterValue = '%';
+            $afterValue  = '%';
         } else {
 
             $operator = $this->_params[sprintf('%s.%s.%s', $this->_options['prefix'], $this->_options['operator'], $field)];
@@ -890,16 +960,16 @@ class FilterResultsComponent extends Component {
                 case 'like':
                 case 'not like':
                     $beforeValue = '%';
-                    $afterValue = '%';
+                    $afterValue  = '%';
                     break;
                     
                 case 'likebegin':
-                    $operator = 'LIKE';
+                    $operator   = 'LIKE';
                     $afterValue = '%';
                     break;
                     
                 case 'likeend':
-                    $operator = 'LIKE';
+                    $operator    = 'LIKE';
                     $beforeValue = '%';
             }
             
@@ -930,18 +1000,20 @@ class FilterResultsComponent extends Component {
  * 
  * @param string $fieldModel
  * @param string $operator
+ * @param string $explodeChar
+ * @param string $explodeConcatenate
  * @param string $value
  * @param string $beforeValue
  * @param string $afterValue 
  * @return array
  * @since 2.0
  */
-    protected function _valueConcatenate($fieldModel, $operator, $value, $beforeValue = '', $afterValue = '') {
+    protected function _valueConcatenate($fieldModel, $operator, $explodeChar, $explodeConcatenate, $value, $beforeValue = '', $afterValue = '') {
 
-        $values = explode($this->_options['explodeChar'], $value);
+        $values = explode($explodeChar, $value);
 
         foreach ($values as $key => $value) {
-            $condition[$this->_options['explodeConcatenate']][$key] = array(
+            $condition[$explodeConcatenate][$key] = array(
                 sprintf('%s %s', $fieldModel, $operator) => sprintf('%s%s%s', $beforeValue, $value, $afterValue)
             );
         }
@@ -1005,8 +1077,8 @@ class FilterResultsComponent extends Component {
  * @since 2.0
  */
     public function setPaginate($option, $value) {
-        $paginate = $this->controller->paginate;
-        $paginate[$option] = $value;
+        $paginate                   = $this->controller->paginate;
+        $paginate[$option]          = $value;
         $this->controller->paginate = $paginate;
     }
     
