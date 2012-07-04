@@ -317,7 +317,7 @@ echo $this->FilterForm->input('filter1');
 echo $this->FilterForm->end(__('Filter', true));
 </pre>
 
-## Operators
+# Operators
 
 The Filter results have pre-defined operators, below you will find all the options available for you to use in their advanced filters.
 
@@ -336,7 +336,7 @@ array(
 );
 </pre>
 
-# BETWEEN
+## Between
 
 For to use the operator `BETWEEN` in FilterResults:
 

@@ -315,7 +315,7 @@ echo $this->FilterForm->input('filter1');
 echo $this->FilterForm->end(__('Filtrar', true));
 </pre>
 
-## Operadores
+# Operadores
 
 O Filter Resultes possuí operadores pré-definidos, abaixo você encontra todas as opções disponíveis para você utilizar em seus filtros avançados.
 
@@ -334,7 +334,7 @@ array(
 );
 </pre>
 
-# Operador BETWEEN
+## Between
 
 Também é possível utilizar o operador `BETWEEN` para consulta entre valores numéricos ou de data. Configure o campo de filtro desta forma:
 
