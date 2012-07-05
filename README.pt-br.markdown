@@ -70,10 +70,10 @@ INSERT INTO groups(name) VALUES('Admin');
 INSERT INTO groups(name) VALUES('Guest');
 
 INSERT INTO users(group_id, name, username) VALUES(1, 'Pedro Elsner', 'pelsner');
-INSERT INTO users(group_id, name, username) VALUES(2, 'Lucas Pedro Mariano Elsner', 'lpmelsner');
+INSERT INTO users(group_id, name, username, active) VALUES(2, 'Lucas Pedro Mariano Elsner', 'lpmelsner', 0);
 INSERT INTO users(group_id, name, username) VALUES(1, 'Petter Morato', 'pmorato');
-INSERT INTO users(group_id, name, username) VALUES(2, 'Rebeca Moraes Silva', 'rebeca_moraes');
-INSERT INTO users(group_id, name, username) VALUES(2, 'Silvia Morato Moraes', 'silvia22');
+INSERT INTO users(group_id, name, username, active) VALUES(2, 'Rebeca Moraes Silva', 'rebeca_moraes', 0);
+INSERT INTO users(group_id, name, username, active) VALUES(2, 'Silvia Morato Moraes', 'silvia22', 0);
 </pre>
 
 # Filtro Simples
@@ -175,7 +175,7 @@ $this->FilterResults->addFilter(
 
 Vamos agora fazer mais uma regra dentro do filtro `filter1`. Queremos que ele filtre pelo nome(`User.name`) ou pelo nome do usuário(`User.username`).
 
-Alteramos então apenas o nosso Controller:
+Portanto teremos apenas um campo de filtro que obedece a duas condições, logo, alteramos apenas as configurações da action:
 
 Arquivo __/app/Controller/UsersController.php__
 <pre>
@@ -193,11 +193,11 @@ $this->FilterResults->addFilters(
 
 A regra `OR` pode ser também `AND` ou `NOT`.
 
-NOTA: Se você definir mais de uma condição sem especificar a regra, o plugin entenderá como `AND` automaticamente.
+__NOTA__: Se você definir mais de uma condição sem especificar a regra, o plugin entenderá como `AND` automaticamente.
 
 # Filtro Simples + Regra Fixa
 
-Vamos supor agora que o nosso filtro `filter1` quando informado deva filtrar pelo nome(`User.name`) E somente usuários ativos.
+Vamos supor agora que o nosso filtro `filter1` quando informado deva filtrar pelo nome(`User.name`) __E__ somente usuários ativos.
 
 Arquivo __/app/Controller/UsersController.php__
 <pre>
@@ -206,6 +206,43 @@ $this->FilterResults->addFilters(
         'filter1' => array(
             'User.name'   => array('operator' => 'LIKE'),
             'User.active' => array('value'    => '1')
+        )
+    )
+);
+</pre>
+
+# Agregação de Filtros
+
+Automáticamente o Filter Results concatena todos os filtros pela regra `AND`. Usando o exemplo a seguir, informando 'Pedro' no `filter1` e 'elsner' no `filter2` teremos a condição: `WHERE (User.name LIKE '%Pedro%') AND (User.usernname LIKE '%elsner%')`
+
+<pre>
+$this->FilterResults->addFilters(
+    array(
+        'filter1' => array(
+            'User.name' => array('operator' => 'LIKE')
+        )
+        'filter2' => array(
+            'User.username' => array('operator' => 'LIKE')
+        )
+    )
+);
+</pre>
+
+__NOTA__: Podemos concatenar os filtros também pelas regras `OR` ou `NOT`.
+
+Vamos alterar nosso exemplo para concatenar os filtros pela regra `OR`, e, se o `filtro1` for informado queremos apenas usuários ativos. Desta vamos obter a condição:  `WHERE ((User.name LIKE '%Pedro%') AND (User.active = 1)) OR (User.usernname LIKE '%elsner%')`
+
+<pre>
+$this->FilterResults->addFilters(
+    array(
+        'OR' => array(
+            'filter1' => array(
+                'User.name'   => array('operator' => 'LIKE'),
+                'User.active' => array('value'    => '1')
+            )
+            'filter2' => array(
+                'User.username' => array('operator' => 'LIKE')
+            )
         )
     )
 );
@@ -272,7 +309,7 @@ function index() {
 }
 </pre>
 
-NOTA: Perceba que desta vez criamos o filtro ´filter1´ sem nenhum parâmetro. Isto porque as regras serão selecionadas na View.
+__NOTA__: Perceba que desta vez criamos o filtro ´filter1´ sem nenhum parâmetro. Isto porque as regras serão selecionadas na View.
 
 Arquivo __/app/View/Users/index.ctp__
 <pre>
@@ -372,4 +409,4 @@ Licenciado pela Creative Commons 3.0 (http://creativecommons.org/licenses/by/3.0
 ## Agradecimentos
 
 * Vinícius Arantes (vinicius.big@gmail.com)
-* Francy Reymer (francys.reymer@gmail.com)
+* Francys Reymer (francys.reymer@gmail.com)

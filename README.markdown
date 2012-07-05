@@ -70,10 +70,10 @@ INSERT INTO groups(name) VALUES('Admin');
 INSERT INTO groups(name) VALUES('Guest');
 
 INSERT INTO users(group_id, name, username) VALUES(1, 'Pedro Elsner', 'pelsner');
-INSERT INTO users(group_id, name, username) VALUES(2, 'Lucas Pedro Mariano Elsner', 'lpmelsner');
+INSERT INTO users(group_id, name, username, active) VALUES(2, 'Lucas Pedro Mariano Elsner', 'lpmelsner', 0);
 INSERT INTO users(group_id, name, username) VALUES(1, 'Petter Morato', 'pmorato');
-INSERT INTO users(group_id, name, username) VALUES(2, 'Rebeca Moraes Silva', 'rebeca_moraes');
-INSERT INTO users(group_id, name, username) VALUES(2, 'Silvia Morato Moraes', 'silvia22');
+INSERT INTO users(group_id, name, username, active) VALUES(2, 'Rebeca Moraes Silva', 'rebeca_moraes', 0);
+INSERT INTO users(group_id, name, username, active) VALUES(2, 'Silvia Morato Moraes', 'silvia22', 0);
 </pre>
 
 # Simple Filter
@@ -195,11 +195,11 @@ $this->FilterResults->addFilters(
 
 The rule `OR` can also be `AND` or `NOT`.
 
-NOTE: If you define more than one condition without the specific rule, the plugin will understand  automatically how `AND`.
+__NOTE__: If you define more than one condition without the specific rule, the plugin will understand  automatically how `AND`.
 
 # Simple Filter + Fixed Rules
 
-Suppose now that our filter `filter1` when informed should filter by name (`User.name`) And only active users.
+Suppose now that our filter `filter1` when informed should filter by name (`User.name`) __AND__ only active users.
 
 File __/app/Controller/UsersController.php__
 <pre>
@@ -208,6 +208,43 @@ $this->FilterResults->addFilters(
         'filter1' => array(
             'User.name'   => array('operator' => 'LIKE'),
             'User.active' => array('value'    => '1')
+        )
+    )
+);
+</pre>
+
+# Filters Aggregation
+
+The Filter Results automatically concatenates all filter by the rule `AND`. See in the follow example, that if informe 'Pedro' in `filter1` and 'elsner' in `filter2` we going to get the condition: `WHERE (User.name LIKE '%Pedro%') AND (User.usernname LIKE '%elsner%')`
+
+<pre>
+$this->FilterResults->addFilters(
+    array(
+        'filter1' => array(
+            'User.name' => array('operator' => 'LIKE')
+        )
+        'filter2' => array(
+            'User.username' => array('operator' => 'LIKE')
+        )
+    )
+);
+</pre>
+
+__NOTE__: We too can concatenate the filters by rules `OR` and `NOT`.
+
+Now, we going to change the example for concatenate the `filter1` and `filter2` by rule `OR`, and, if `filter1` is not empty, only the active users. So, we going to get this condition: `WHERE ((User.name LIKE '%Pedro%') AND (User.active = 1)) OR (User.usernname LIKE '%elsner%')`
+
+<pre>
+$this->FilterResults->addFilters(
+    array(
+        'OR' => array(
+            'filter1' => array(
+                'User.name'   => array('operator' => 'LIKE'),
+                'User.active' => array('value'    => '1')
+            )
+            'filter2' => array(
+                'User.username' => array('operator' => 'LIKE')
+            )
         )
     )
 );
@@ -274,7 +311,7 @@ function index() {
 }
 </pre>
 
-NOTE: Note that this time we filter `filter1` without any parameters. This is because the rules are selected in the View.
+__NOTE__: Note that this time we filter `filter1` without any parameters. This is because the rules are selected in the View.
 
 File __/app/View/Users/index.ctp__
 <pre>
@@ -360,4 +397,4 @@ Licensed under Creative Commons 3.0 (http://creativecommons.org/licenses/by/3.0/
 ## Thanks
 
 * Vinícius Arantes (vinicius.big@gmail.com)
-* Francy Reymer (francys.reymer@gmail.com)
+* Francys Reymer (francys.reymer@gmail.com)

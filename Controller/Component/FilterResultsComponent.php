@@ -30,7 +30,7 @@ class FilterResultsComponent extends Component {
 /**
  * Controle do número de instâncias
  *
- * @var int
+ * @var    int
  * @access public
  * @static
  * @since  1.0
@@ -40,7 +40,7 @@ class FilterResultsComponent extends Component {
 /**
  * Idencificação da instância
  *
- * @var int
+ * @var    int
  * @access private
  * @since  1.0
  */
@@ -49,7 +49,7 @@ class FilterResultsComponent extends Component {
 /**
  * Configurações do Component
  *
- * @var array
+ * @var    array
  * @access private
  * @since  1.0
  */
@@ -69,7 +69,7 @@ class FilterResultsComponent extends Component {
 /**
  * Recebe 'conditions' gerado pelo self::make()
  *
- * @var array
+ * @var    array
  * @access private
  * @since  1.0
  */
@@ -78,7 +78,7 @@ class FilterResultsComponent extends Component {
 /**
  * Recebe 'params' sem criptografia
  *
- * @var array
+ * @var    array
  * @access private
  * @since  1.0
  */
@@ -118,8 +118,8 @@ class FilterResultsComponent extends Component {
  *
  * Executado antes do Controller::beforeFiler()
  *
- * @param object $controller Passa por referencia o Controller
- * @param array $fields Passa as configurações dos campos para pesquisa
+ * @param  object $controller Passa por referencia o Controller
+ * @param  array  $fields     Passa as configurações dos campos para pesquisa
  * @access public
  * @since  1.0
  */
@@ -133,7 +133,7 @@ class FilterResultsComponent extends Component {
  *
  * Executado depois do Controller::beforeFiler() mas antes de executar a Action solicitada
  *
- * @param object $controller Passa por referencia o Controller
+ * @param  object $controller Passa por referencia o Controller
  * @access public
  * @since  1.0
  */
@@ -147,7 +147,7 @@ class FilterResultsComponent extends Component {
  *
  * Executado antes do Controller:beforeRender()
  *
- * @param object $controller Passa por referencia o Controller 
+ * @param  object $controller Passa por referencia o Controller 
  * @access public
  * @since  1.0
  */
@@ -161,7 +161,7 @@ class FilterResultsComponent extends Component {
  *
  * Executado depois do Controller:render()
  *
- * @param object $controller Passa por referencia o Controller 
+ * @param  object $controller Passa por referencia o Controller 
  * @access public
  * @since  1.0
  */
@@ -175,10 +175,10 @@ class FilterResultsComponent extends Component {
  *
  * Executado antes do Controller:redirect()
  *
- * @param object $controller Passa por referencia o Controller
- * @param array $url
- * @param string $status
- * @param boolean $exit
+ * @param  object  $controller Passa por referencia o Controller
+ * @param  array   $url
+ * @param  string  $status
+ * @param  boolean $exit
  * @access public
  * @since  1.0
  */
@@ -190,7 +190,7 @@ class FilterResultsComponent extends Component {
 /**
  * Encripty
  *
- * @param string $string
+ * @param  string $string
  * @return string
  * @access protected
  * @since  1.0
@@ -203,7 +203,7 @@ class FilterResultsComponent extends Component {
 /**
  * Decripty
  *
- * @param string $string
+ * @param  string $string
  * @return string
  * @access protected
  * @since  1.0
@@ -285,7 +285,7 @@ class FilterResultsComponent extends Component {
 /**
  * Set Auto Paginate
  *
- * @param string $autoPaginate
+ * @param  string $autoPaginate
  * @throws Exception Quando $autoPaginate não for boleana
  * @access public
  * @since  1.0
@@ -315,7 +315,7 @@ class FilterResultsComponent extends Component {
 /**
  * Set Auto Like Explode
  *
- * @param string $autoLikeExplode
+ * @param  string $autoLikeExplode
  * @throws Exception Quando $autoLikeExplode não for boleana
  * @access public
  * @since  2.0
@@ -344,7 +344,7 @@ class FilterResultsComponent extends Component {
 /**
  * Set Explode Char
  *
- * @param string $autoLikeExplode
+ * @param  string $autoLikeExplode
  * @throws Exception Quando $autoLikeExplode não for string
  * @access public
  * @since  2.0
@@ -374,7 +374,7 @@ class FilterResultsComponent extends Component {
 /**
  * Set Explode Concatenate
  *
- * @param string $autoLikeExplode
+ * @param  string $autoLikeExplode
  * @throws Exception Quando $autoLikeExplode não for string
  * @throws Exception Quando $autoLikeExplode deve ser: 'AND' ou 'OR'
  * @access public
@@ -410,7 +410,7 @@ class FilterResultsComponent extends Component {
  * Set Prefix
  *
  *
- * @param string $prefix
+ * @param  string $prefix
  * @return string
  * @throws Exception Quando $prefix não for uma string
  * @throws Exception Quando $prefix estiver vazia
@@ -434,33 +434,54 @@ class FilterResultsComponent extends Component {
 /**
  * Has Field
  *
- * @param string $field
+ * @param  string $field
  * @return boolean
  * @access public
  * @since  1.0
  */
     public function hasField($field) {
+        return self::_searchField($field, $this->_options['filters']);
+    }
 
-        if (isset($this->_options['filters'][$field])) {
-            return true;
-        } else {
-            foreach ($this->_options['filters'] as $key => $value) {
-                if (is_string($value)) {
-                    if ($value == $field) {
-                        return true;
-                    }
+
+/**
+ * Search Field
+ * 
+ * @param  string  $field  
+ * @param  type    $filters
+ * @return boolean
+ * @access protected
+ * @since 2.0
+ */
+    protected function _searchField($field, $filters) {
+
+        $hasField = false;
+
+        foreach($filters as $key => $value) {
+
+            if (mb_strtolower($key) == 'and' || mb_strtolower($key) == 'or') {
+                $hasField = self::_searchField($field, $value);
+            }
+
+            if (is_string($value)) {
+               if ($value == $field) {
+                    $hasField = true;
                 }
             }
+
+            if ($key == $field) {
+               $hasField = true;
+            }
         }
-        
-        return false;
+
+        return $hasField;
     }
-    
-    
+
+
 /**
  * Get Field Values
  *
- * @param string $field
+ * @param  string $field
  * @return array
  * @access public
  * @since  1.0
@@ -482,7 +503,7 @@ class FilterResultsComponent extends Component {
 /**
  * Foreach Field For Values
  *
- * @param array $array
+ * @param  array $array
  * @return array
  * @access public
  * @since  1.0
@@ -510,7 +531,7 @@ class FilterResultsComponent extends Component {
 /**
  * Set Filters
  *
- * @param array $filters
+ * @param  array $filters
  * @throws Exception Quando $filters não for um array
  * @access public
  * @since  1.0
@@ -528,9 +549,8 @@ class FilterResultsComponent extends Component {
 /**
  * Values
  *
- * @static
- * @param string $label
- * @param array $values
+ * @param  string $label
+ * @param  array  $values
  * @return array
  * @since  2.0
  */
@@ -544,12 +564,12 @@ class FilterResultsComponent extends Component {
  *
  * DEPRECATED IN 04/07/2012
  * 
- * @param string $label
- * @param array $values
- * @return array
- * @access public
+ * @param      string $label
+ * @param      array  $values
+ * @return     array
+ * @access     public
  * @deprecated 04/07/2012
- * @since  1.0
+ * @since      1.0
  */
     public function merge($label, $values) {
         $return   = array('' => $label);
@@ -608,6 +628,7 @@ class FilterResultsComponent extends Component {
              * onde o resultador será algo parecido como:
              * example.com/cake/posts/index/Search.keywords:mykeyword/Search.tag_id:3
              */
+            
 
             $url = array();
             $get = array();
@@ -658,7 +679,9 @@ class FilterResultsComponent extends Component {
         }
         
         if (self::_check() > 0) {
-            $this->_conditions = self::_filterFields();
+            
+            $this->_conditions = self::_filterFields($this->_options['filters']);
+
             if ($this->_options['autoPaginate']) {
                 $this->controller->Paginator->paginate['conditions'][] = $this->_conditions;
             }
@@ -710,14 +733,33 @@ class FilterResultsComponent extends Component {
  * @access protected
  * @since  1.0
  */
-    protected function _filterFields() {
+    protected function _filterFields($filters) {
 
         $result = array();
-        
-        foreach ($this->_options['filters'] as $key => $value) {
-            $result += (is_array($value))
-                     ? self::_makeConditions($key, $value)
-                     : self::_makeConditions($value);
+
+        foreach ($filters as $key => $value) {
+
+            switch (mb_strtolower($key, 'utf-8')) {
+                case 'not':
+                case 'and':
+                case 'or':
+                    
+                    $conditionOfFilter = self::_filterFields($value);
+                    if (count($conditionOfFilter) > 0) {
+                        if (!isset($result[$key])) {
+                            $result[$key] = self::_filterFields($value);
+                        } else {
+                            $result[$key] += self::_filterFields($value);
+                        }    
+                    }
+                    break;
+                
+                default:
+                    $result += (is_array($value))
+                         ? self::_makeConditions($key, $value)
+                         : self::_makeConditions($value);
+            }
+
         }
         
         return $result;
@@ -766,7 +808,7 @@ class FilterResultsComponent extends Component {
                     $fieldModel = (is_array($option))
                                 ? $key
                                 : $option;
-                    
+
                     /**
                      * Verifica se parametros do fieldModel foram enviados
                      */
@@ -787,35 +829,28 @@ class FilterResultsComponent extends Component {
                             $value = $this->_params[sprintf('%s.%s', $this->_options['prefix'], $field)];
                         }
 
-
-                        /**
-                         * Para se não houver valor
-                         */
-                        if (empty($value)) {
-                            return array();
-                        }
-
-
-                        if (mb_strtolower($operator, 'utf-8') == 'between') {
-                            $condition += self::_conditionsForOperatorBetween($field, $options, $fieldModel, $operator, $value);
-
-                        } else {
-
-                            $beforeValue = self::_defaultOptionsValue($operator, $options, $fieldModel, 'beforeValue');
-                            $afterValue  = self::_defaultOptionsValue($operator, $options, $fieldModel, 'afterValue');
-
-                            $explodeChar        = self::_defaultOptionsExplode($operator, $options, $fieldModel, 'explodeChar');
-                            $explodeConcatenate = self::_defaultOptionsExplode($operator, $options, $fieldModel, 'explodeConcatenate');
-
-                            if (self::__isMayExplodeValue($operator, $options, $fieldModel)) {
-                                $condition += self::_valueConcatenate($fieldModel, $operator, $explodeChar, $explodeConcatenate, $value, $beforeValue, $afterValue);
+                        if (!empty($value)) {
+                            if (mb_strtolower($operator, 'utf-8') == 'between') {
+                                $condition += self::_conditionsForOperatorBetween($field, $options, $fieldModel, $operator, $value);
+    
                             } else {
-                                $condition += array(
-                                    sprintf('%s %s', $fieldModel, $operator) => sprintf('%s%s%s', $beforeValue, $value, $afterValue)
-                                );
-                            }
 
-                            $this->controller->request->data[$this->_options['prefix']][$field] = $this->_params[sprintf('%s.%s', $this->_options['prefix'], $field)];
+                                $beforeValue = self::_defaultOptionsValue($operator, $options, $fieldModel, 'beforeValue');
+                                $afterValue  = self::_defaultOptionsValue($operator, $options, $fieldModel, 'afterValue');
+    
+                                $explodeChar        = self::_defaultOptionsExplode($operator, $options, $fieldModel, 'explodeChar');
+                                $explodeConcatenate = self::_defaultOptionsExplode($operator, $options, $fieldModel, 'explodeConcatenate');
+    
+                                if (self::__isMayExplodeValue($operator, $options, $fieldModel)) {
+                                    $condition += self::_valueConcatenate($fieldModel, $operator, $explodeChar, $explodeConcatenate, $value, $beforeValue, $afterValue);
+                                } else {
+                                    $condition += array(
+                                        sprintf('%s %s', $fieldModel, $operator) => sprintf('%s%s%s', $beforeValue, $value, $afterValue)
+                                    );
+                                }
+
+                                $this->controller->request->data[$this->_options['prefix']][$field] = $this->_params[sprintf('%s.%s', $this->_options['prefix'], $field)];
+                            }
                         }
 
                     }
@@ -969,7 +1004,7 @@ class FilterResultsComponent extends Component {
  *
  * Gera a 'condition' para cada campos sem parametros
  *
- * @param array $field
+ * @param  array $field
  * @return array
  * @access protected
  * @since  2.0
@@ -1051,22 +1086,28 @@ class FilterResultsComponent extends Component {
  * 
  * Make concatenate conditions LIKE
  * 
- * @param string $fieldModel
- * @param string $operator
- * @param string $explodeChar
- * @param string $explodeConcatenate
- * @param string $value
- * @param string $beforeValue
- * @param string $afterValue 
+ * @param  string $fieldModel
+ * @param  string $operator
+ * @param  string $explodeChar
+ * @param  string $explodeConcatenate
+ * @param  string $value
+ * @param  string $beforeValue
+ * @param  string $afterValue 
  * @return array
- * @since 2.0
+ * @since  2.0
  */
     protected function _valueConcatenate($fieldModel, $operator, $explodeChar, $explodeConcatenate, $value, $beforeValue = '', $afterValue = '') {
 
         $values = explode($explodeChar, $value);
 
-        foreach ($values as $key => $value) {
-            $condition[$explodeConcatenate][$key] = array(
+        if (count($values) > 1) {
+            foreach ($values as $k => $v) {
+                $condition[$explodeConcatenate][$k] = array(
+                    sprintf('%s %s', $fieldModel, $operator) => sprintf('%s%s%s', $beforeValue, $v, $afterValue)
+                );
+            }
+        } else {
+            $condition = array(
                 sprintf('%s %s', $fieldModel, $operator) => sprintf('%s%s%s', $beforeValue, $value, $afterValue)
             );
         }
@@ -1101,7 +1142,7 @@ class FilterResultsComponent extends Component {
 /**
  * Get Operation
  * 
- * @param type $name
+ * @param  type $name
  * @return type
  * @access public
  * @since  1.1
@@ -1109,6 +1150,8 @@ class FilterResultsComponent extends Component {
  */
     public function getOperation($name) {
         
+        return '';
+
         foreach ($this->_options['filters'][$name] as $key => $value) {
             if (isset($value['operator'])) {
                 return $value['operator'];
@@ -1124,10 +1167,10 @@ class FilterResultsComponent extends Component {
  * 
  * Define opções do Component Paginator para CakePHP2.2+
  * 
- * @param string $option Opção
- * @param type   $value  Valor
+ * @param  string $option Opção
+ * @param  type   $value  Valor
  * @access public
- * @since 2.0
+ * @since  2.0
  */
     public function setPaginate($option, $value) {
         $paginate                   = $this->controller->paginate;
