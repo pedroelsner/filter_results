@@ -36,6 +36,16 @@ class FilterResultsComponent extends Component {
  * @since  1.0
  */
     public static $instances = 0;
+
+/**
+ * Recebe opções do filtro atual para função self::_makeConditions()
+ *
+ * @var    array
+ * @access private
+ * @static
+ * @since  2.0
+ */
+    private static $_filter = array();
     
 /**
  * Idencificação da instância
@@ -451,7 +461,7 @@ class FilterResultsComponent extends Component {
  * @param  type    $filters
  * @return boolean
  * @access protected
- * @since 2.0
+ * @since  2.0
  */
     protected function _searchField($field, $filters) {
 
@@ -459,18 +469,23 @@ class FilterResultsComponent extends Component {
 
         foreach($filters as $key => $value) {
 
-            if (mb_strtolower($key) == 'and' || mb_strtolower($key) == 'or') {
-                $hasField = self::_searchField($field, $value);
-            }
+            switch (mb_strtolower($key)) {
+                case 'not':
+                case 'and':
+                case 'or':
+                    $hasField = self::_searchField($field, $value);
+                    break;
 
-            if (is_string($value)) {
-               if ($value == $field) {
-                    $hasField = true;
-                }
-            }
-
-            if ($key == $field) {
-               $hasField = true;
+                default:
+                    if (is_string($value)) {
+                       if ($value == $field) {
+                            $hasField = true;
+                        }
+                    }
+                    
+                    if ($key == $field) {
+                        $hasField = true;
+                    }
             }
         }
 
@@ -490,10 +505,9 @@ class FilterResultsComponent extends Component {
         
         $values = array();
         
-        if (isset($this->_options['filters'][$field])) {
-            if (is_array($this->_options['filters'][$field])) {
-                $values += self::_foreachFieldForValues($this->_options['filters'][$field]);
-            }
+        if (self::hasField($field)) {
+            $options = self::_getFilterOptions($field, $this->_options['filters']);
+            $values += self::_foreachFieldForValues($options);
         }
         
         return (count($values) == 0) ? null : $values;
@@ -572,9 +586,7 @@ class FilterResultsComponent extends Component {
  * @since      1.0
  */
     public function merge($label, $values) {
-        $return   = array('' => $label);
-        $return[] = $values;
-        return $return;
+        return array('' => $label) + $values;
     }
 
     
@@ -622,7 +634,7 @@ class FilterResultsComponent extends Component {
         /**
          * Verifica parâmetros enviados via POST
          */
-        if (isset($this->controller->request->data[$this->_options['prefix']])) {
+        if (isset($this->controller->request->data[self::getPrefix()])) {
             /**
              * Monta a url com elementos enviados pelo formulário,
              * onde o resultador será algo parecido como:
@@ -644,13 +656,13 @@ class FilterResultsComponent extends Component {
             }
             
             
-            foreach ($this->controller->request->data[$this->_options['prefix']] as $key => $value) {
+            foreach ($this->controller->request->data[self::getPrefix()] as $key => $value) {
 
                 if (!is_array($value)) {
-                    $url[self::_encrypt(sprintf('%s.%s', $this->_options['prefix'], $key))] = self::_encrypt($value);
+                    $url[self::_encrypt(sprintf('%s.%s', self::getPrefix(), $key))] = self::_encrypt($value);
                 } else {
                     foreach ($value as $k => $v) {
-                        $url[self::_encrypt(sprintf('%s.%s.%s', $this->_options['prefix'], $key, $k))] = self::_encrypt($v);
+                        $url[self::_encrypt(sprintf('%s.%s.%s', self::getPrefix(), $key, $k))] = self::_encrypt($v);
                     }
                 }
             }
@@ -714,7 +726,7 @@ class FilterResultsComponent extends Component {
         $count = 0;
         
         foreach ($this->_params as $key => $value) {
-            if (strpos($key, $this->_options['prefix']) > -1) {
+            if (strpos($key,self::getPrefix()) > -1) {
                 $count++;
             }
         }
@@ -792,69 +804,88 @@ class FilterResultsComponent extends Component {
         /**
          * Campos com parâmetros
          */
-        foreach ($options as $key => $option) {
+        foreach ($options as $key => $value) {
 
             switch (strtolower($key)) {
                 case 'not':
                 case 'and':
                 case 'or':
                     $condition += array(
-                        $key => self::_makeConditions($field, $option)
+                        $key => self::_makeConditions($field, $value)
                     );
                     break;
                 
                 default:
                     
-                    $fieldModel = (is_array($option))
-                                ? $key
-                                : $option;
+                    /**
+                     * Verifica se parametros do campo foram enviados
+                     */                    
+                    if (!isset($this->_params[sprintf('%s.%s', self::getPrefix(), $field)])) {
+                        break;
+                    }
+
+
+                    self::$_filter = array();
+                    self::$_filter['field'] = $field;
+
+                    if (is_array($value)) {
+                        self::$_filter['fieldModel'] = $key;
+                        self::$_filter += $value;
+                    } else {
+                        self::$_filter['fieldModel'] = (is_array($value)) ? $key : $value;
+                    }
+
+                    if (!isset(self::$_filter['value'])) {
+                        self::$_filter['value'] = $this->_params[sprintf('%s.%s', self::getPrefix(), $field)];
+                    } else {
+                        if (is_array(self::$_filter['value'])) {
+                            self::$_filter['value'] = $this->_params[sprintf('%s.%s', self::getPrefix(), $field)];
+                        }
+                    }
 
                     /**
-                     * Verifica se parametros do fieldModel foram enviados
-                     */
-                    if (isset($this->_params[sprintf('%s.%s', $this->_options['prefix'], $field)])) {
+                     * Verifica se ha valor
+                     */                    
+                    if (empty(self::$_filter['value'])) {
+                        break;
+                    }
 
-                        $operator = (isset($options[$fieldModel]['operator']))
-                                  ? $options[$fieldModel]['operator']
-                                  : '=';
-                        
+                    if (!isset(self::$_filter['operator'])) {
+                        self::$_filter['operator'] = '=';
+                    }
 
-                        if (isset($options[$fieldModel]['value'])) {
+                    self::$_filter['beforeValue'] = self::_defaultOptionsValue('beforeValue');
+                    self::$_filter['afterValue']  = self::_defaultOptionsValue('afterValue');
 
-                            $value = (is_array($options[$fieldModel]['value']))
-                                   ? $this->_params[sprintf('%s.%s', $this->_options['prefix'], $field)]
-                                   : $options[$fieldModel]['value'];
+                    if (!isset(self::$_filter['explode'])) {
+                        self::$_filter['explode'] = null;
+                    }
 
-                        } else {
-                            $value = $this->_params[sprintf('%s.%s', $this->_options['prefix'], $field)];
-                        }
+                    if (!isset(self::$_filter['explodeConcatenate'])) {
+                        self::$_filter['explodeConcatenate'] = self::getExplodeConcatenate();
+                    }
 
-                        if (!empty($value)) {
-                            if (mb_strtolower($operator, 'utf-8') == 'between') {
-                                $condition += self::_conditionsForOperatorBetween($field, $options, $fieldModel, $operator, $value);
-    
-                            } else {
-
-                                $beforeValue = self::_defaultOptionsValue($operator, $options, $fieldModel, 'beforeValue');
-                                $afterValue  = self::_defaultOptionsValue($operator, $options, $fieldModel, 'afterValue');
-    
-                                $explodeChar        = self::_defaultOptionsExplode($operator, $options, $fieldModel, 'explodeChar');
-                                $explodeConcatenate = self::_defaultOptionsExplode($operator, $options, $fieldModel, 'explodeConcatenate');
-    
-                                if (self::__isMayExplodeValue($operator, $options, $fieldModel)) {
-                                    $condition += self::_valueConcatenate($fieldModel, $operator, $explodeChar, $explodeConcatenate, $value, $beforeValue, $afterValue);
-                                } else {
-                                    $condition += array(
-                                        sprintf('%s %s', $fieldModel, $operator) => sprintf('%s%s%s', $beforeValue, $value, $afterValue)
-                                    );
-                                }
-
-                                $this->controller->request->data[$this->_options['prefix']][$field] = $this->_params[sprintf('%s.%s', $this->_options['prefix'], $field)];
-                            }
-                        }
-
+                    if (!isset(self::$_filter['explodeChar'])) {
+                        self::$_filter['explodeChar'] = self::getExplodeChar();
                     }
                     
+
+                    if (mb_strtolower(self::$_filter['operator'], 'utf-8') == 'between') {
+                        $condition += self::_conditionsForOperatorBetween();
+                    
+                    } else {
+
+                        if (self::_isMayExplodeValue()) {
+                            $condition += self::_valueConcatenate();
+                        } else {
+                            $condition += self::_value();
+                        }
+
+                        /**
+                         * Alimenta formulario com valor filtrado
+                         */
+                        $this->controller->request->data[self::getPrefix()][$field] = $this->_params[sprintf('%s.%s', self::getPrefix(), self::$_filter['field'])];
+                    }
 
             }
         }
@@ -866,23 +897,25 @@ class FilterResultsComponent extends Component {
 /**
  * Default Options Value
  * 
- * @param string $operator
- * @param array $options
- * @param string $fieldModel
- * @param string $optionValue
+ * @param string $option
  * @return string
  * @access protected
  * @since 2.0
  */
-    protected function _defaultOptionsValue($operator, $options, $fieldModel, $optionValue) {
+    protected function _defaultOptionsValue($option) {
 
-        $default = (isset($options[$fieldModel][$optionValue]))
-                 ? $options[$fieldModel][$optionValue]
-                 : '';
+        $default = (isset(self::$_filter[$option])) ? self::$_filter[$option] : '';
 
         if (!$default) {
-            if (mb_strtolower($operator, 'utf-8') == 'like' || mb_strtolower($operator, 'utf-8') == 'not like') {
-                $default = '%';
+            
+            switch (mb_strtolower(self::$_filter['operator'], 'utf-8')) {
+                case 'like':
+                case 'not like':
+                    $default = '%';
+                    break;
+                
+                default:
+                    break;
             }
         }
 
@@ -891,54 +924,34 @@ class FilterResultsComponent extends Component {
 
 
 /**
- * Default Options Explode
- * 
- * @param string $operator
- * @param array $options
- * @param string $fieldModel
- * @param string $optionExplode
- * @return string
- * @access protected
- * @since 2.0
- */
-    protected function _defaultOptionsExplode($operator, $options, $fieldModel, $optionExplode) {
-
-        return (isset($options[$fieldModel][$optionExplode]))
-             ? $options[$fieldModel][$optionExplode]
-             : $this->_options[$optionExplode];
-    }
-
-
-/**
  * Is May Explode Value
  * 
  * Função que verifica a possíbilidade de "explodir" o valor
  * 
- * @param string $operator
- * @param array $options
  * @return boolean
  * @access private
  * @since 2.0
  */
-    private function __isMayExplodeValue($operator, $options, $fieldModel) {
+    private function _isMayExplodeValue() {
 
-        $fieldOption = (isset($options[$fieldModel]['explode']))
-                     ? $options[$fieldModel]['explode']
-                     : null;
+        if (count(self::$_filter) == 0) {
+            return false;
+        }
 
-        $fieldOption = (is_bool($fieldOption))
-                     ? $fieldOption
-                     : null;
+        if (is_null(self::$_filter['explode'])) {
 
-        if (is_null($fieldOption)) {
-            if (mb_strtolower($operator, 'utf-8') == 'like' || mb_strtolower($operator, 'utf-8') == 'not like') {
-                if ($this->_options['autoLikeExplode']) {
-                    return true;
-                }
+            switch (mb_strtolower(self::$_filter['operator'], 'utf-8')) {
+                case 'like':
+                case 'not like':
+                    return self::getAutoLikeExplode();
+                    break;
+
+                default:
+                    break;
             }
         }
 
-        if($fieldOption) {
+        if (self::$_filter['explode']) {
             return true;
         }
 
@@ -957,43 +970,50 @@ class FilterResultsComponent extends Component {
  * @return array
  * @author Vinícius Arantes <vinicius.big@gmail.com>
  */
-    protected function _conditionsForOperatorBetween($field, $options, $fieldModel, $operator, $value) {
+    protected function _conditionsForOperatorBetween() {
+
+        if (count(self::$_filter) == 0) {
+            return array();
+        }
 
         /**
          * Verifica a existencia dos dois parâmetros
          */ 
-        if(!isset($this->_params[sprintf('%s.%s', $this->_options['prefix'], $field)]) || !isset($this->_params[sprintf('%s.%s2', $this->_options['prefix'], $field)])) {
+        if (!isset($this->_params[sprintf('%s.%s', self::getPrefix(), self::$_filter['field'])])
+         || !isset($this->_params[sprintf('%s.%s2', self::getPrefix(), self::$_filter['field'])]))
+        {
                                 
-            if (isset($this->_params[sprintf('%s.%s', $this->_options['prefix'], $field)])) {
-                $$this->controller->request->data[$this->_options['prefix']][$field] = $this->_params[sprintf('%s.%s', $this->_options['prefix'], $field)];
+            if (isset($this->_params[sprintf('%s.%s', self::getPrefix(), self::$_filter['field'])])) {
+                $$this->controller->request->data[self::getPrefix()][self::$_filter['field']] = $this->_params[sprintf('%s.%s', self::getPrefix(), self::$_filter['field'])];
             }
 
-            if (isset($this->_params[sprintf('%s.%s2', $this->_options['prefix'], $field)])) {
-                $$this->controller->request->data[$this->_options['prefix']][$field.'2'] = $this->_params[sprintf('%s.%s2', $this->_options['prefix'], $field)];
+            if (isset($this->_params[sprintf('%s.%s2', self::getPrefix(), self::$_filter['field'])])) {
+                $$this->controller->request->data[self::getPrefix()][self::$_filter['field'].'2'] = $this->_params[sprintf('%s.%s2', self::getPrefix(), self::$_filter['field'])];
             }
 
             return array();
         }
 
-
-        $value2 = $this->_params[sprintf('%s.%s2', $this->_options['prefix'], $field)];
+        self::$_filter['value_between'] = $this->_params[sprintf('%s.%s2', self::getPrefix(), self::$_filter['field'])];
         
 
         /** 
          * Altera o formato da data para formato de banco
          */
-        if(isset($options[$fieldModel]['convertDate']) && $options[$fieldModel]['convertDate']) {
-            $value  = implode(preg_match("~\/~", $value)  == 0 ? "/" : "-", array_reverse(explode(preg_match("~\/~", $value)  == 0 ? "-" : "/", $value)));
-            $value2 = implode(preg_match("~\/~", $value2) == 0 ? "/" : "-", array_reverse(explode(preg_match("~\/~", $value2) == 0 ? "-" : "/", $value2)));
+        if (isset(self::$_filter['convertDate'])) {
+            if (self::$_filter['convertDate']) {
+                self::$_filter['value']         = implode(preg_match("~\/~", self::$_filter['value'])         == 0 ? "/" : "-", array_reverse(explode(preg_match("~\/~", self::$_filter['value'])         == 0 ? "-" : "/", self::$_filter['value'])));
+                self::$_filter['value_between'] = implode(preg_match("~\/~", self::$_filter['value_between']) == 0 ? "/" : "-", array_reverse(explode(preg_match("~\/~", self::$_filter['value_between']) == 0 ? "-" : "/", self::$_filter['value_between'])));
+            }
         }
                             
-                            
-        $value     = array($value, $value2);
-        $operator  = 'BETWEEN ? AND ?';
-        $condition = array(sprintf('%s %s', $fieldModel, $operator) => $value);
-                            
-        $$this->controller->request->data[$this->_options['prefix']][$field]     = $this->_params[sprintf('%s.%s', $this->_options['prefix'], $field)];
-        $$this->controller->request->data[$this->_options['prefix']][$field.'2'] = $this->_params[sprintf('%s.%s2', $this->_options['prefix'], $field)];
+        self::$_filter['value']    = array(self::$_filter['value'], self::$_filter['value_between']);
+        self::$_filter['operator'] = 'BETWEEN ? AND ?';
+        
+        $condition = array(sprintf('%s %s', self::$_filter['fieldModel'], self::$_filter['operator']) => self::$_filter['value']);
+        
+        $this->controller->request->data[self::getPrefix()][self::$_filter['field']]     = $this->_params[sprintf('%s.%s', self::getPrefix(), self::$_filter['field'])];
+        $this->controller->request->data[self::getPrefix()][self::$_filter['field'].'2'] = $this->_params[sprintf('%s.%s2', self::getPrefix(), self::$_filter['field'])];
 
         return $condition;
     }
@@ -1065,7 +1085,7 @@ class FilterResultsComponent extends Component {
         }
 
             
-        if (self::__isMayExplodeValue($operator)) {
+        if (self::_isMayExplodeValue($operator)) {
             $condition = self::_valueConcatenate($fieldModel, $operator, $value, $beforeValue, $afterValue);
         } else {
             $condition = array(
@@ -1082,34 +1102,50 @@ class FilterResultsComponent extends Component {
 
 
 /**
- * Value Concatenate Like
+ * Value
  * 
- * Make concatenate conditions LIKE
- * 
- * @param  string $fieldModel
- * @param  string $operator
- * @param  string $explodeChar
- * @param  string $explodeConcatenate
- * @param  string $value
- * @param  string $beforeValue
- * @param  string $afterValue 
  * @return array
+ * @access protected
  * @since  2.0
  */
-    protected function _valueConcatenate($fieldModel, $operator, $explodeChar, $explodeConcatenate, $value, $beforeValue = '', $afterValue = '') {
+    protected function _value() {
 
-        $values = explode($explodeChar, $value);
+        if (count(self::$_filter) == 0) {
+            return array();
+        }
+
+        return array(
+            sprintf('%s %s', self::$_filter['fieldModel'], self::$_filter['operator']) =>
+            sprintf('%s%s%s', self::$_filter['beforeValue'], self::$_filter['value'], self::$_filter['afterValue'])
+        );
+    }
+
+
+/**
+ * Value Concatenate
+ * 
+ * Concatena os valores explodidos
+ * 
+ * @return array
+ * @access protected
+ * @since  2.0
+ */
+    protected function _valueConcatenate() {
+
+        $condition = array();
+        $values = explode(self::$_filter['explodeChar'], self::$_filter['value']);
 
         if (count($values) > 1) {
+
             foreach ($values as $k => $v) {
-                $condition[$explodeConcatenate][$k] = array(
-                    sprintf('%s %s', $fieldModel, $operator) => sprintf('%s%s%s', $beforeValue, $v, $afterValue)
+                $condition[self::$_filter['explodeConcatenate']][$k] = array(
+                    sprintf('%s %s', self::$_filter['fieldModel'], self::$_filter['operator']) =>
+                    sprintf('%s%s%s', self::$_filter['beforeValue'], $v, self::$_filter['afterValue'])
                 );
             }
+
         } else {
-            $condition = array(
-                sprintf('%s %s', $fieldModel, $operator) => sprintf('%s%s%s', $beforeValue, $value, $afterValue)
-            );
+            $condition = self::_value();
         }
 
         return $condition;
@@ -1142,23 +1178,56 @@ class FilterResultsComponent extends Component {
 /**
  * Get Operation
  * 
- * @param  type $name
+ * @param  type $field
  * @return type
  * @access public
  * @since  1.1
- * @author Vinícius Arantes <vinicius.big@gmail.com>
  */
-    public function getOperation($name) {
-        
-        return '';
+    public function getOperation($field) {
 
-        foreach ($this->_options['filters'][$name] as $key => $value) {
+        $options = self::_getFilterOptions($field, $this->_options['filters']);
+        foreach ($options as $key => $value) {
             if (isset($value['operator'])) {
                 return $value['operator'];
             }
         }
 
         return '';
+    }
+
+
+/**
+ * Search Filter Options
+ * 
+ * Retorna as opções do filtro
+ * 
+ * @param  string  $field  
+ * @param  type    $filters
+ * @return array
+ * @access protected
+ * @since  2.0
+ */
+    protected function _getFilterOptions($field, $filters) {
+
+        $return = array();
+
+        foreach($filters as $key => $value) {
+
+            switch (mb_strtolower($key)) {
+                case 'not':
+                case 'and':
+                case 'or':
+                    $return = self::_getFilterOptions($field, $value);
+                    break;
+                
+                default:
+                   if ($key == $field) {
+                        $return = $value;
+                   }
+            }
+        }
+
+        return $return;
     }
 
 

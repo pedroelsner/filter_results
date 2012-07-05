@@ -379,7 +379,10 @@ Também é possível utilizar o operador `BETWEEN` para consulta entre valores n
 $this->FilterResults->addFilters(
     array(
         'filter1' => array(
-            'User.id' => array('operator' => 'BETWEEN')
+            'User.id' => array(
+                'operator'    => 'BETWEEN'
+                'betweenText' => __('e', true)
+            )
         )
     )
 );
@@ -393,6 +396,7 @@ $this->FilterResults->addFilters(
         'filter1' => array(
             'User.modified' => array(
                 'operator'    => 'BETWEEN',
+                'betweenText' => __('e', true),
                 'convertDate' => true
             )
         )

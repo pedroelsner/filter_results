@@ -381,7 +381,10 @@ For to use the operator `BETWEEN` in FilterResults:
 $this->FilterResults->addFilters(
     array(
         'filter1' => array(
-            'User.id' => array('operator' => 'BETWEEN')
+            'User.id' => array(
+                'operator'    => 'BETWEEN',
+                'betweenText' => __('and', true)
+            )
         )
     )
 );

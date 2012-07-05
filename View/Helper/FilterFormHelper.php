@@ -167,7 +167,7 @@ class FilterFormHelper extends FormHelper {
          * Gera 2 campos para considção 'BETWEEN'
          */ 
         if(mb_strtolower($this->_component->getOperation($name), 'utf-8') == 'between') {
-            $input .= (isset($setting['between'])) ? $setting['between'] : ' ';
+            $input .= (isset($setting['betweenText'])) ? $setting['betweenText'] : ' ';
             $input .= parent::input(sprintf('%s.%s2', $this->_component->getPrefix(), $name), $settings);
         }
         
