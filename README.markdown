@@ -26,10 +26,14 @@ Edit the file __/app/AppController.php__:
 <pre>
 var $components = array(
     'FilterResults.FilterResults' => array(
-        'autoPaginate'       => false,
-        'autoLikeExplode'    => true,  // recommended
-        'explodeChar'        => ' ',   // recommended
-        'explodeConcatenate' => 'AND'  // recommended (can be 'OR')
+        'auto' => array(
+            'paginate' => false,
+            'explode'  => true,  // recommended
+        ),
+        'explode' => array(
+            'character'   => ' ',
+            'concatenate' => 'AND',
+        )
     )
 );
 
@@ -40,8 +44,8 @@ var $helpers = array(
 
 Settings parameters:
 
-*   __autoPaginate:__ If you set TRUE, the Paginate will be configured automatically.
-*   __autoLikeExplode:__ If you set TRUE, the filter value  will be explode by the `explodeChar` and concatenate by the condition `explodeConcatenate`.
+*   __auto->paginate:__ If you set TRUE, the Paginate will be configured automatically.
+*   __auto->explode:__ If you set TRUE, the filter value  will be explode by the `explode->character` and concatenate by the `explode->concatenate`.
 
 # Using the Component
 
@@ -70,8 +74,8 @@ INSERT INTO groups(name) VALUES('Admin');
 INSERT INTO groups(name) VALUES('Guest');
 
 INSERT INTO users(group_id, name, username) VALUES(1, 'Pedro Elsner', 'pelsner');
-INSERT INTO users(group_id, name, username, active) VALUES(2, 'Lucas Pedro Mariano Elsner', 'lpmelsner', 0);
 INSERT INTO users(group_id, name, username) VALUES(1, 'Petter Morato', 'pmorato');
+INSERT INTO users(group_id, name, username, active) VALUES(2, 'Lucas Pedro Mariano Elsner', 'lpmelsner', 0);
 INSERT INTO users(group_id, name, username, active) VALUES(2, 'Rebeca Moraes Silva', 'rebeca_moraes', 0);
 INSERT INTO users(group_id, name, username, active) VALUES(2, 'Silvia Morato Moraes', 'silvia22', 0);
 </pre>
@@ -89,9 +93,11 @@ function index() {
         array(
             'filter1' => array(
                 'User.name' => array(
-                    'operator'    => 'LIKE',
-                    'beforeValue' => '%', // optional
-                    'afterValue'  => '%'  // optional
+                    'operator' => 'LIKE',
+                    'value' => array(
+                        'before' => '%', // optional
+                        'after'  => '%'  // optional
+                    )
                 )
             )
         )
@@ -147,10 +153,11 @@ $this->FilterResults->addFilter(
     array(
         'filter1' => array(
             'User.name' => array(
-                'operator'           => 'LIKE',
-                'explode'            => true,
-                'explodeChar'        => '-',
-                'explodeConcatenate' => 'OR'
+                'operator' => 'LIKE',
+                'explode' => array(
+                    'character'   = '-',
+                    'concatenate' = 'OR'
+                )
             )
         )
     )
@@ -266,7 +273,7 @@ function index() {
             ),
             'filter2' => array(
                 'User.group_id' => array(
-                    'value' => $this->FilterResults->values('Grupo', $this->User->Group->find('list'))
+                    'select' => $this->FilterResults->select('Grupo', $this->User->Group->find('list'))
                 )
             )
         )
@@ -383,7 +390,9 @@ $this->FilterResults->addFilters(
         'filter1' => array(
             'User.id' => array(
                 'operator'    => 'BETWEEN',
-                'betweenText' => __('and', true)
+                'between' => array(
+                    'text' => __(' and ', true)
+                )
             )
         )
     )

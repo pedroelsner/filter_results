@@ -1,45 +1,39 @@
 <?php
 /**
- * Helper para criação de campos de formulário para o Componente 'Filter Results'
- *
- * Compatível com PHP 5.2+
+ * Helper to create form fields.
  *
  * Licenciado pela Creative Commons 3.0
  *
  * @filesource
  * @copyright  Copyright 2012, Pedro Elsner (http://pedroelsner.com/)
  * @author     Pedro Elsner <pedro.elsner@gmail.com>
- * @license    Creative Commons 3.0 (http://creativecommons.org/licenses/by/3.0/br/)
- * @since      v 2.0
+ * @license    Creative Commons 3.0 (http://creativecommons.org/licenses/by/3.0/)
+ * @since      2.0
  */
-
 
 App::uses('FormHelper', 'View/Helper');
 
 /**
- * Filter Form Helper
+ * Create object´s form with setting for component.
  *
- * @use        AppHelper
+ * @use        FormHelper
  * @package    filter_results
  * @subpackage filter_results.filter_form
- * @link       http://www.github.com/pedroelsner/filter_results
+ * @link       http://www.github.com/pedroelsner/filter_results/tree/2.0/View/Helper/FilterFormHelper.php
  */
 class FilterFormHelper extends FormHelper {  
-    
+
 /**
- * Guarda referencia para o Componente 'Filter Results'
+ * Save controller's reference
  *
  * @var object
- * @access private
+ * @access protected
  * @since 1.0
  */
-    private $_component;
-    
-    
+    protected $_component;
+
 /**
  * Setup
- * 
- * Recebe referencia do Componente 'Filter Results'
  *
  * @param object $component Referencia ao componente 'Filter Results'
  * @access protected
@@ -48,21 +42,17 @@ class FilterFormHelper extends FormHelper {
     protected function _setup(FilterResultsComponent $component) {
         $this->_component = $component;
     }
-    
-    
+
 /**
- * Has Component
- *
- * Verifica se componente foi inicializado
+ * Check if component has been inicialized
  *
  * @return boolean
  * @access protected
  * @since 1.0
  */
     protected function _hasComponent() {
-        return (is_object($this->_component)) ? true : false;
+        return is_object($this->_component);
     }
-    
     
 /**
  * Create
@@ -85,7 +75,6 @@ class FilterFormHelper extends FormHelper {
             $settings = array();
         }
         
-        
         $default = array(
             'inputDefaults' => array(
                 'label' => false,
@@ -94,12 +83,11 @@ class FilterFormHelper extends FormHelper {
         );
         
         $settings = array_merge($settings, $default);
-        $settings = array_merge($settings, $this->_component->getFormOptions());
+        $settings = array_merge($settings, $this->_component->getOption('form'));
         
         return parent::create(null, $settings);
     }
-    
-    
+
 /**
  * End
  *
@@ -117,8 +105,7 @@ class FilterFormHelper extends FormHelper {
         
         return parent::end($submit, $settings);
     }
-    
-    
+
 /**
  * Submit
  *
@@ -137,8 +124,7 @@ class FilterFormHelper extends FormHelper {
         return parent::submit($name, $settings);
         
     }
-    
-    
+
 /**
  * Input
  *
@@ -159,26 +145,20 @@ class FilterFormHelper extends FormHelper {
         }
         
         
-        $settings['options'] = $this->_component->getFieldValues($name);
+        $settings['options'] = $this->_component->getFieldSelect($name);
 
-        $input = parent::input(sprintf('%s.%s', $this->_component->getPrefix(), $name), $settings);
+        $input = parent::input(sprintf('%s.%s', $this->_component->getOption('label', 'prefix'), $name), $settings);
 
-        /**
-         * Gera 2 campos para considção 'BETWEEN'
-         */ 
-        if(mb_strtolower($this->_component->getOperation($name), 'utf-8') == 'between') {
-            $input .= (isset($setting['betweenText'])) ? $setting['betweenText'] : ' ';
-            $input .= parent::input(sprintf('%s.%s2', $this->_component->getPrefix(), $name), $settings);
+        if($this->_component->getFieldOperator($name) == 'between') {
+            $input .= (isset($setting['between']['text'])) ? $setting['between']['text'] : ' ';
+            $input .= parent::input(sprintf('%s.%s2', $this->_component->getOption('label', 'prefix'), $name), $settings);
         }
         
         return $input;
     }
-    
-    
+
 /**
- * Select Operators
- *
- * Exibe campo de seleção de operações do filtro
+ * Return selection field of operators
  *
  * @param string $name
  * @param array $options
@@ -220,7 +200,7 @@ class FilterFormHelper extends FormHelper {
         
         $settings['options'] = $options;
         
-        return parent::input(sprintf('%s.%s.%s', $this->_component->getPrefix(), $this->_component->getOperator(), $name), $settings);
+        return parent::input(sprintf('%s.%s.%s', $this->_component->getOption('label', 'prefix'), $this->_component->$this->_component->getOption('label', 'operator'), $name), $settings);
         
     }
     
@@ -257,7 +237,7 @@ class FilterFormHelper extends FormHelper {
         
         $settings['options'] = $options;
 
-        return self::input(sprintf('%s.%s.%s', $this->_component->getPrefix(), $this->_component->getFieldModel(), $name), $settings);
+        return self::input(sprintf('%s.%s.%s', $this->_component->getOption('label', 'prefix'), $this->_component->$this->_component->getOption('label', 'fieldModel'), $name), $settings);
     }
     
 }

@@ -26,10 +26,14 @@ Edite o arquivo __/app/AppController.php__:
 <pre>
 var $components = array(
     'FilterResults.FilterResults' => array(
-        'autoPaginate'       => false,
-        'autoLikeExplode'    => true,  // recomendado
-        'explodeChar'        => ' ',   // recomendado
-        'explodeConcatenate' => 'AND'  // recomendado (pode ser 'OR')
+        'auto' => array(
+            'paginate' => false,
+            'explode'  => true,  // recomendado
+        ),
+        'explode' => array(
+            'character'   => ' ',
+            'concatenate' => 'AND',
+        )
     )
 );
 
@@ -40,8 +44,8 @@ var $helpers = array(
 
 Parâmetros de configurações do componente:
 
-*   __autoPaginate:__ Se você definir como TRUE, o Paginate será configurado automaticamente.
-*   __autoLikeExplode:__ Se você definir como TRUE, o valor de pesquisa será quebrado pelo `explodeChar` e concatenado pela condição `explodeConcatenate`.
+*   __auto->paginate:__ Se você definir como TRUE, o Paginate será configurado automaticamente.
+*   __auto->explode:__ Se você definir como TRUE, o valor de pesquisa será quebrado pelo `explode->character` e concatenado pela condição `explode->concatenate`.
 
 # Utilização
 
@@ -70,8 +74,8 @@ INSERT INTO groups(name) VALUES('Admin');
 INSERT INTO groups(name) VALUES('Guest');
 
 INSERT INTO users(group_id, name, username) VALUES(1, 'Pedro Elsner', 'pelsner');
-INSERT INTO users(group_id, name, username, active) VALUES(2, 'Lucas Pedro Mariano Elsner', 'lpmelsner', 0);
 INSERT INTO users(group_id, name, username) VALUES(1, 'Petter Morato', 'pmorato');
+INSERT INTO users(group_id, name, username, active) VALUES(2, 'Lucas Pedro Mariano Elsner', 'lpmelsner', 0);
 INSERT INTO users(group_id, name, username, active) VALUES(2, 'Rebeca Moraes Silva', 'rebeca_moraes', 0);
 INSERT INTO users(group_id, name, username, active) VALUES(2, 'Silvia Morato Moraes', 'silvia22', 0);
 </pre>
@@ -89,9 +93,11 @@ function index() {
         array(
             'filter1' => array(
                 'User.name' => array(
-                    'operator'    => 'LIKE',
-                    'beforeValue' => '%', // opcional
-                    'afterValue'  => '%'  // opcional
+                    'operator' => 'LIKE',
+                    'value' => array(
+                        'before' => '%', // opcional
+                        'after'  => '%'  // opcional
+                    )
                 )
             )
         )
@@ -147,8 +153,11 @@ $this->FilterResults->addFilter(
     array(
         'filter1' => array(
             'User.name' => array(
-                'operator' => '=',
-                'explode'  => true
+                'operator' => 'LIKE',
+                'explode' => array(
+                    'character'   = '-',
+                    'concatenate' = 'OR'
+                )
             )
         )
     )
@@ -264,7 +273,7 @@ function index() {
             ),
             'filter2' => array(
                 'User.group_id' => array(
-                    'value' => $this->FilterResults->values('Grupo', $this->User->Group->find('list'))
+                    'select' => $this->FilterResults->select('Grupo', $this->User->Group->find('list'))
                 )
             )
         )
@@ -380,24 +389,28 @@ $this->FilterResults->addFilters(
     array(
         'filter1' => array(
             'User.id' => array(
-                'operator'    => 'BETWEEN'
-                'betweenText' => __('e', true)
+                'operator' => 'BETWEEN'
+                'between' => array(
+                    'text' => __(' e ', true)
+                )
             )
         )
     )
 );
 </pre>
 
-Para campos de data, adicione a opção `'convertDate' => true` para converte a data informada para o formato `YYYY-MM-DD`:
+Para campos de data, adicione a opção `'date' => true` para converte a data informada para o formato `YYYY-MM-DD`:
 
 <pre>
 $this->FilterResults->addFilters(
     array(
         'filter1' => array(
             'User.modified' => array(
-                'operator'    => 'BETWEEN',
-                'betweenText' => __('e', true),
-                'convertDate' => true
+                'operator' => 'BETWEEN',
+                'between' => array(
+                    'text' => __(' e ', true),
+                    'date' => true
+                )
             )
         )
     )
