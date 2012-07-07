@@ -14,7 +14,7 @@
 App::uses('FormHelper', 'View/Helper');
 
 /**
- * Create object´s form with setting for component.
+ * Create form's inputs with setting for component.
  *
  * @use        FormHelper
  * @package    filter_results
@@ -70,6 +70,8 @@ public function __construct(View $view, $settings = array()) {
             $this->_component = $value;
         }
     }
+
+    $this->_options = array_merge($this->_options, $settings);
 }
 
 /**
