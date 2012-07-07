@@ -5,7 +5,7 @@ Generates `conditions` to `find` methods in CakePHP 1.3 from a search form.
 ## Compatibility
 
 Compatible with CakePHP 1.3 + Paginate (Component)
-* Version for CakePHP 2.x: [http://github.com/pedroelsner/filter_results/](http://github.com/pedroelsner/filter_results/ "FilterResults para CakePHP 2.x")
+* Version for CakePHP 2.x: [http://github.com/pedroelsner/filter_results/tree/2.0/](http://github.com/pedroelsner/filter_results/tree/2.0/ "FilterResults para CakePHP 2.x")
 
 # Installation
 
@@ -18,18 +18,39 @@ Edit the file __/app/app_controller.php__:
 <pre>
 var $components = array(
     'FilterResults.FilterResults' => array(
-        'autoPaginate' => false
+        'auto' => array(
+            'paginate' => false,
+            'explode'  => true,  // recommended
+        ),
+        'explode' => array(
+            'character'   => ' ',
+            'concatenate' => 'AND',
+        )
     )
 );
 
 var $helpers = array(
-    'FilterResults.FilterForm'
+    'FilterResults.FilterForm' => array(
+        'operators' => array(
+            'LIKE'       => 'containing',
+            'NOT LIKE'   => 'not containing',
+            'LIKE BEGIN' => 'starting with',
+            'LIKE END'   => 'ending with',
+            '='  => 'equal to',
+            '!=' => 'different',
+            '>'  => 'greater than',
+            '>=' => 'greater or equal to',
+            '&lt;'  => 'less than',
+            '&lt;=' => 'less or equal to'
+        )
+    )
 );
 </pre>
 
 Settings parameters:
 
-*   __autoPaginate:__ If you set TRUE, the Paginate will be configured automatically.
+*   __auto->paginate:__ If you set TRUE, the Paginate will be configured automatically.
+*   __auto->explode:__ If you set TRUE, the filter value  will be explode by the `explode->character` and concatenate by the `explode->concatenate`.
 
 # Using the Component
 
@@ -39,8 +60,6 @@ For the examples contained herein, will build on the following database
 CREATE TABLE groups (
     id INT UNSIGNED NOT NULL AUTO_INCREMENT,
     name VARCHAR(200) NOT NULL,
-    created DATETIME NULL,
-    modified DATETIME NULL,
     PRIMARY KEY(id),
     UNIQUE(name)
 ) ENGINE=INNODB;
@@ -50,14 +69,20 @@ CREATE TABLE users (
     group_id INT UNSIGNED NOT NULL,
     name VARCHAR(200) NOT NULL,
     username VARCHAR(20) NOT NULL,
-    password VARCHAR(100) NOT NULL,
-    created DATETIME NULL,
-    modified DATETIME NULL,
     active TINYINT(1) NOT NULL DEFAULT 1,
     PRIMARY KEY(id),
     FOREIGN KEY(group_id) REFERENCES groups(id),
     UNIQUE(username)
 ) ENGINE=INNODB;
+
+INSERT INTO groups(name) VALUES('Admin');
+INSERT INTO groups(name) VALUES('Guest');
+
+INSERT INTO users(group_id, name, username) VALUES(1, 'Pedro Elsner', 'pelsner');
+INSERT INTO users(group_id, name, username) VALUES(1, 'Petter Morato', 'pmorato');
+INSERT INTO users(group_id, name, username, active) VALUES(2, 'Lucas Pedro Mariano Elsner', 'lpmelsner', 0);
+INSERT INTO users(group_id, name, username, active) VALUES(2, 'Rebeca Moraes Silva', 'rebeca_moraes', 0);
+INSERT INTO users(group_id, name, username, active) VALUES(2, 'Silvia Morato Moraes', 'silvia22', 0);
 </pre>
 
 # Simple Filter
@@ -66,28 +91,30 @@ Well, after generating the screens at Bake or [Bake utf8] (http://www.github.com
 
 File __/app/controller/users_controller.php__
 <pre>
-function admin_index()
-{
-    $this->User->recursive = 0;
+function admin_index() {
 
-    // Filter Results
+    // Add filter
     $this->FilterResults->addFilters(
         array(
             'filter1' => array(
                 'User.name' => array(
-                    'operator'    => 'LIKE',
-                    'beforeValue' => '%', // Opcional
-                    'afterValue'  => '%'  // Opcional
+                    'operator' => 'LIKE',
+                    'value' => array(
+                        'before' => '%', // optional
+                        'after'  => '%'  // optional
+                    )
                 )
             )
         )
     );
-    
-    // Paginate
-    $this->paginate['order'] = 'User.name ASC';
-    $this->paginate['limit'] = 10;
-    $this->paginate['conditions'] = $this->FilterResults->make();
 
+    $this->paginate['order'] = 'User.name ASC'; // optional
+    $this->paginate['limit'] = 10;              // optional
+
+    // Define conditions
+    $this->paginate['conditions'] = $this->FilterResults->getConditions();
+
+    $this->User->recursive = 0;
     $this->set('users', $this->paginate());
 }
 </pre>
@@ -98,13 +125,64 @@ Now we just have to make the form on View at the top of the table.
 
 File __/app/view/users/admin_index.ctp)__
 <pre>
-$this->FilterForm->create($FilterResults);
-$this->FilterForm->input('filter1');
-$this->FilterForm->submit(__('Filtrar', true));
-$this->FilterForm->end();
+echo $this->FilterForm->create($FilterResults);
+echo $this->FilterForm->input('filter1');
+echo $this->FilterForm->end(__('Filter', true));
 </pre>
 
 Ready! We have a field that filters the user by name and compatible with the Paginate.
+
+And more, the Filter Results automaticaly explode the filter value to gain a better results. For example: if we filter by 'Pedro Elsner', the condition will be: `WHERE ((User.name LIKE '%Pedro%') AND (User.name LIKE '%Elsner%'))`
+
+## Explode Settings
+
+The option `explode` for operators `LIKE` and `NOT LIKE` is always enabled in the settings of the Filter Results. But, how do you know, you can disable it into components declaration in controller. If you do, you can enable the `explode` function for only the specified filter:
+
+<pre>
+$this->FilterResults->addFilter(
+    array(
+        'filter1' => array(
+            'User.name' => array(
+                'operator' => 'LIKE',
+                'explode'  => true
+            )
+        )
+    )
+);
+</pre>
+
+Too is possible to change the explode parameters for each filter.
+
+<pre>
+$this->FilterResults->addFilter(
+    array(
+        'filter1' => array(
+            'User.name' => array(
+                'operator' => 'LIKE',
+                'explode' => array(
+                    'character'   = '-',
+                    'concatenate' = 'OR'
+                )
+            )
+        )
+    )
+);
+</pre>
+
+Also, you can to use the explode function with any operator (like `=`). See:
+
+<pre>
+$this->FilterResults->addFilter(
+    array(
+        'filter1' => array(
+            'User.name' => array(
+                'operator' => '=',
+                'explode'  => true
+            )
+        )
+    )
+);
+</pre>
 
 # Simple Filter + Composite Rule
 
@@ -117,17 +195,9 @@ File __/app/controller/users_controller.php__
 $this->FilterResults->addFilters(
     array(
         'filter1' => array(
-            'OR' => array( // REGRA "OU"
-                'User.name' => array(
-                    'operator'    => 'LIKE',
-                    'beforeValue' => '%',
-                    'afterValue'  => '%'
-                ),
-                'User.username' => array(
-                    'operator'    => 'LIKE',
-                    'beforeValue' => '%',
-                    'afterValue'  => '%'
-                )
+            'OR' => array(
+                'User.name'     => array('operator' => 'LIKE'),
+                'User.username' => array('operator' => 'LIKE')
             )
         )
     )
@@ -136,24 +206,55 @@ $this->FilterResults->addFilters(
 
 The rule `OR` can also be `AND` or `NOT`.
 
-NOTE: If you define more than one condition without the specific rule, the plugin will understand  automatically how `AND`.
+__NOTE__: If you define more than one condition without the specific rule, the plugin will understand  automatically how `AND`.
 
 # Simple Filter + Fixed Rules
 
-Suppose now that our filter `filter1` when informed should filter by name (`User.name`) And only active users.
+Suppose now that our filter `filter1` when informed should filter by name (`User.name`) __AND__ only active users.
 
 File __/app/controller/users_controller.php__
 <pre>
 $this->FilterResults->addFilters(
     array(
         'filter1' => array(
-            'User.name' => array(
-                'operator'    => 'LIKE',
-                'beforeValue' => '%',
-                'afterValue'  => '%'
-            ),
-            'User.active' => array(
-                'value' => '1'
+            'User.name'   => array('operator' => 'LIKE'),
+            'User.active' => array('value'    => '1')
+        )
+    )
+);
+</pre>
+
+# Filters Aggregation
+
+The Filter Results automatically concatenates all filter by the rule `AND`. See in the follow example, that if informe 'Pedro' in `filter1` and 'elsner' in `filter2` we going to get the condition: `WHERE (User.name LIKE '%Pedro%') AND (User.usernname LIKE '%elsner%')`
+
+<pre>
+$this->FilterResults->addFilters(
+    array(
+        'filter1' => array(
+            'User.name' => array('operator' => 'LIKE')
+        )
+        'filter2' => array(
+            'User.username' => array('operator' => 'LIKE')
+        )
+    )
+);
+</pre>
+
+__NOTE__: We too can concatenate the filters by rules `OR` and `NOT`.
+
+Now, we going to change the example for concatenate the `filter1` and `filter2` by rule `OR`, and, if `filter1` is not empty, only the active users. So, we going to get this condition: `WHERE ((User.name LIKE '%Pedro%') AND (User.active = 1)) OR (User.usernname LIKE '%elsner%')`
+
+<pre>
+$this->FilterResults->addFilters(
+    array(
+        'OR' => array(
+            'filter1' => array(
+                'User.name'   => array('operator' => 'LIKE'),
+                'User.active' => array('value'    => '1')
+            )
+            'filter2' => array(
+                'User.username' => array('operator' => 'LIKE')
             )
         )
     )
@@ -166,44 +267,36 @@ Let's change our filter. In addition to filtering by name, we now also filter by
 
 File __/app/controller/users_controller.php__
 <pre>
-function admin_index()
-{
-    $this->User->recursive = 0;
-
-    // Filter Results
+function index() {
+    
+    // Add filter
     $this->FilterResults->addFilters(
         array(
             'filter1' => array(
-                'User.name' => array(
-                    'operator'    => 'LIKE',
-                    'beforeValue' => '%',
-                    'afterValue'  => '%'
-                )
+                'User.name' => array('operator' => 'LIKE')
             ),
             'filter2' => array(
                 'User.group_id' => array(
-                    'value' => $this->FilterResults->merge('Grupo' ,$this->User->Group->find('list'))
+                    'select' => $this->FilterResults->select('Grupo', $this->User->Group->find('list'))
                 )
             )
         )
     );
     
-    // Paginate
-    $this->paginate['order'] = 'User.name ASC';
-    $this->paginate['limit'] = 10;
-    $this->paginate['conditions'] = $this->FilterResults->make();
+    // Define conditions
+    $this->paginate['conditions'] = $this->FilterResults->getConditions();
 
+    $this->User->recursive = 0;
     $this->set('users', $this->paginate());
 }
 </pre>
 
 File __/app/view/users/admin_index.ctp__
 <pre>
-$this->FilterForm->create($FilterResults);
-$this->FilterForm->input('filter2', array('class' => 'select-box'));
-$this->FilterForm->input('filter1');
-$this->FilterForm->submit(__('Filtrar', true));
-$this->FilterForm->end();
+echo $this->FilterForm->create($FilterResults);
+echo $this->FilterForm->input('filter2', array('class' => 'select-box'));
+echo $this->FilterForm->input('filter1');
+echo $this->FilterForm->end(__('Filter', true));
 </pre>
 
 Ready! Use and abuse of those filters you want.
@@ -216,32 +309,28 @@ In some cases we want something different than, for example, we want the user to
 
 File __/app/controller/users_controller.php__
 <pre>
-function admin_index()
-{
-    $this->User->recursive = 0;
-
-    // Filter Results
-    $this->FilterResults->addFilters(array('filter1'));
+function index() {
     
-     // Paginate
-    $this->paginate['order'] = 'User.name ASC';
-    $this->paginate['limit'] = 10;
-    $this->paginate['conditions'] = $this->FilterResults->make();
+    // Add filter
+    $this->FilterResults->addFilters('filter1');
+    
+    // Define conditions
+    $this->paginate['conditions'] = $this->FilterResults->getConditions();
 
+    $this->User->recursive = 0;
     $this->set('users', $this->paginate());
 }
 </pre>
 
-NOTE: Note that this time we filter `filter1` without any parameters. This is because the rules are selected in the View.
+__NOTE__: Note that this time we filter `filter1` without any parameters. This is because the rules are selected in the View.
 
 File __/app/view/users/admin_index.ctp__
 <pre>
-$this->FilterForm->create($FilterResults);
-$this->FilterForm->selectFields('filter1', null, array('class' => 'select-box'));
-$this->FilterForm->selectOperators('filter1');
-$this->FilterForm->input('filter1');
-$this->FilterForm->submit(__('Filtrar', true));
-$this->FilterForm->end();
+echo $this->FilterForm->create($FilterResults);
+echo $this->FilterForm->selectFields('filter1', null, array('class' => 'select-box'));
+echo $this->FilterForm->selectOperators('filter1');
+echo $this->FilterForm->input('filter1');
+echo $this->FilterForm->end(__('Filter', true));
 </pre>
 
 Now, you can first select the field (automatically the Filter Results table lists the fields), then inform the operator and the desired value for the filter.
@@ -252,65 +341,68 @@ For this, we change only the View.
 
 Arquivo __/app/view/users/admin_index.ctp__
 <pre>
-$this->FilterForm->create($FilterResults);
-$this->FilterForm->selectFields(
-    'filter1',
-    array(
-        'User.id'       => __('ID', true),
-        'User.name'     => __('Nome', true),
-        'User.username' => __('Usuário', true),
-    ),
-    array(
-        'class' => 'select-box'
-    )
-);
-$this->FilterForm->selectOperators(
-    'filter1',
-    array(
-        'LIKE' => __('Contendo', true),
-        '='    => __('Igual a', true)
-    )
-);
-$this->FilterForm->input('filter1');
-$this->FilterForm->submit(__('Filtrar', true));
-$this->FilterForm->end();
+echo $this->FilterForm->create($FilterResults);
+
+echo $this->FilterForm->selectFields('filter1',
+        array(
+            'User.id'       => __('ID', true),
+            'User.name'     => __('Name', true),
+            'User.username' => __('Username', true),
+        ),
+        array(
+            'class' => 'select-box'
+        )
+    );
+
+echo $this->FilterForm->selectOperators('filter1',
+        array(
+            'LIKE' => __('containing', true),
+            '='    => __('equal to', true)
+        )
+    );
+
+echo $this->FilterForm->input('filter1');
+echo $this->FilterForm->end(__('Filter', true));
 </pre>
 
-## Operators
+# Operators
 
 The Filter results have pre-defined operators, below you will find all the options available for you to use in their advanced filters.
 
 <pre>
 array(
-    'LIKE'      => __('contendo', true),
-    'NOT LIKE'  => __('não contendo', true),
-    'LIKEbegin' => __('começando com', true),
-    'LIKEend'   => __('terminando com', true),
-    '='  => __('iqual a', true),
-    '!=' => __('diferente de', true),
-    '>'  => __('maior que', true),
-    '>=' => __('maior ou igual', true),
-    '<'  => __('menor que', true),
-    '<=' => __('menor ou igual', true)
+    'LIKE'       => __('containing', true),
+    'NOT LIKE'   => __('not containing', true),
+    'LIKE BEGIN' => __('starting with', true),
+    'LIKE END'   => __('ending with', true),
+    '='  => __('equal to', true),
+    '!=' => __('different', true),
+    '>'  => __('greater than', true),
+    '>=' => __('greater or equal to', true),
+    '&lt;'  => __('less than', true),
+    '&lt;=' => __('less or equal to', true)
 );
 </pre>
 
-# Operator BETWEEN
+## Between
 
-Now is possible too use the operator `BETWEEN` in FilterResults:
+For to use the operator `BETWEEN`:
 
 <pre>
-// Filter Results
 $this->FilterResults->addFilters(
     array(
         'filter1' => array(
             'User.id' => array(
-                'operator'    => 'BETWEEN'
+                'operator'    => 'BETWEEN',
+                'between' => array(
+                    'text' => __(' and ', true)
+                )
             )
         )
     )
 );
 </pre>
+
 
 # Copyright e License
 
