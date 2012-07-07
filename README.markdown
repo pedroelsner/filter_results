@@ -48,8 +48,8 @@ var $helpers = array(
             '!=' => 'different',
             '>'  => 'greater than',
             '>=' => 'greater or equal to',
-            '<'  => 'less than',
-            '<=' => 'less or equal to'
+            '&lt;'  => 'less than',
+            '&lt;=' => 'less or equal to'
         )
     )
 );
@@ -388,14 +388,14 @@ array(
     '!=' => __('different', true),
     '>'  => __('greater than', true),
     '>=' => __('greater or equal to', true),
-    '<'  => __('less than', true),
-    '<=' => __('less or equal to', true)
+    '&lt;'  => __('less than', true),
+    '&lt;=' => __('less or equal to', true)
 );
 </pre>
 
 ## Between
 
-For to use the operator `BETWEEN` in FilterResults:
+For to use the operator `BETWEEN`:
 
 <pre>
 $this->FilterResults->addFilters(
