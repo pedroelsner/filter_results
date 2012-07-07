@@ -120,7 +120,7 @@ Agora temos apenas que fazer o formulário na View em cima da tabela.
 
 Arquivo __/app/View/Users/index.ctp)__
 <pre>
-echo $this->FilterForm->create($FilterResults);
+echo $this->FilterForm->create();
 echo $this->FilterForm->input('filter1');
 echo $this->FilterForm->end(__('Filtrar', true));
 </pre>
@@ -289,7 +289,7 @@ function index() {
 
 Arquivo __/app/View/Users/index.ctp__
 <pre>
-echo $this->FilterForm->create($FilterResults);
+echo $this->FilterForm->create();
 echo $this->FilterForm->input('filter2', array('class' => 'select-box'));
 echo $this->FilterForm->input('filter1');
 echo $this->FilterForm->end(__('Filtrar', true));
@@ -322,7 +322,7 @@ __NOTA__: Perceba que desta vez criamos o filtro ´filter1´ sem nenhum parâmet
 
 Arquivo __/app/View/Users/index.ctp__
 <pre>
-echo $this->FilterForm->create($FilterResults);
+echo $this->FilterForm->create();
 echo $this->FilterForm->selectFields('filter1', null, array('class' => 'select-box'));
 echo $this->FilterForm->selectOperators('filter1');
 echo $this->FilterForm->input('filter1');
@@ -337,7 +337,7 @@ Para isso, mudamos somente a View.
 
 Arquivo __/app/View/Users/index.ctp__
 <pre>
-echo $this->FilterForm->create($FilterResults);
+echo $this->FilterForm->create();
 
 echo $this->FilterForm->selectFields('filter1',
         array(

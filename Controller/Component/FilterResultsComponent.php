@@ -12,8 +12,6 @@
  * @version    2.0
  */
 
-App::uses('Component', 'Controller/Component');
-
 /**
  * Application component class for return conditions array to cake model.
  * Provides basic functionality and encrypt or decrypt fields of the form sent.
@@ -597,16 +595,20 @@ class FilterResultsComponent extends Component {
                 
                 default:
                     
-                    /**
-                     * Check the parameter's value, if empty break
-                     */                    
-                    if (!isset($this->_params[sprintf('%s.%s', $this->getOption('label', 'prefix'), $field)])) {
-                        break;
-                    }
-
                     $this->_filter = array();
                     $this->_filter['field'] = $field;
 
+                    /**
+                     * Check the parameter's value, if empty break
+                     */                    
+                    if (!$this->_hasFieldParams()) {
+                        break;
+                    }
+
+
+                    /**
+                     * Define defaults
+                     */
                     if (is_array($value)) {
                         $this->_filter['fieldModel'] = $key;
                         $this->_filter += $value;
@@ -623,11 +625,9 @@ class FilterResultsComponent extends Component {
 
 
                     if (!isset($this->_filter['value']) || is_array($this->_filter['value'])) {
-                        $this->_filter['value'] = $this->_params[sprintf('%s.%s', $this->getOption('label', 'prefix'), $field)];
+                        $this->_filter['value'] = $this->_getFieldParams();
                     } else {
-                        $this->_filter['value'] = (isset($this->_filter['select']))
-                                                ? $this->_params[sprintf('%s.%s', $this->getOption('label', 'prefix'), $field)]
-                                                : '';
+                        $this->_filter['value'] = (isset($this->_filter['select'])) ? $this->_getFieldParams() : '';
                     }
                     
                     if (empty($this->_filter['value'])) {
@@ -661,7 +661,7 @@ class FilterResultsComponent extends Component {
                                         ? $this->_valueConcatenate()
                                         : $this->_value();
 
-                            $this->controller->request->data[$this->getOption('label', 'prefix')][$field] = $this->_params[sprintf('%s.%s', $this->getOption('label', 'prefix'), $this->_filter['field'])];
+                            $this->controller->request->data[$this->getOption('label', 'prefix')][$this->_filter['field']] = $this->_getFieldParams();
                             break;
                     }
 
@@ -670,6 +670,37 @@ class FilterResultsComponent extends Component {
         
         return $condition;
     }
+
+
+protected function _hasFieldParams($more = null, $between = false) {
+    
+    if ($between) {
+        return isset($this->_params[sprintf('%s.%s.between', $this->getOption('label', 'prefix'), $this->_filter['field'])]);
+    }
+
+    if (is_null($more)) {
+        return isset($this->_params[sprintf('%s.%s', $this->getOption('label', 'prefix'), $this->_filter['field'])]);
+    } else {
+        return isset($this->_params[sprintf('%s.%s.%s', $this->getOption('label', 'prefix'), $this->getOption('label', $more), $this->_filter['field'])]);
+    }
+}
+
+protected function _getFieldParams($more = null, $between = false) {
+    
+    if (!$this->_hasFieldParams($more, $between)) {
+        return '';
+    }
+    
+    if ($between) {
+        return $this->_params[sprintf('%s.%s.between', $this->getOption('label', 'prefix'), $this->_filter['field'])];
+    }
+
+    if (is_null($more)) {
+        return $this->_params[sprintf('%s.%s', $this->getOption('label', 'prefix'), $this->_filter['field'])];
+    } else {
+        return $this->_params[sprintf('%s.%s.%s', $this->getOption('label', 'prefix'), $this->getOption('label', $more), $this->_filter['field'])];
+    }
+}
 
 /**
  * Make conditions for fileds without specified parameters
@@ -681,11 +712,14 @@ class FilterResultsComponent extends Component {
  */
     protected function _makeConditionsWithoutOptions($field) {
 
-        if (!isset($this->_params[sprintf('%s.%s', $this->getOption('label', 'prefix'), $field)])) {
+        $this->_filter = array();
+        $this->_filter['field'] = $field;
+
+        if (!$this->_hasFieldParams()) {
             return array();
         }
-            
-        if (!isset($this->_params[sprintf('%s.%s.%s', $this->getOption('label', 'prefix'), $this->getOption('label', 'fieldModel'), $field)])) {
+        
+        if (!$this->_hasFieldParams('fieldModel')) {
             return array();
         }
         
@@ -693,17 +727,13 @@ class FilterResultsComponent extends Component {
         /**
          * Define defaults
          */
-        $this->_filter = array();
-        $this->_filter['field']      = $field;
-        $this->_filter['fieldModel'] = $this->_params[sprintf('%s.%s.%s', $this->getOption('label', 'prefix'), $this->getOption('label', 'fieldModel'), $field)];
-        $this->_filter['value']      = $this->_params[sprintf('%s.%s', $this->getOption('label', 'prefix'), $field)];
+        $this->_filter['fieldModel'] = $this->_getFieldParams('fieldModel');
+        $this->_filter['value']      = $this->_getFieldParams();
 
-        $this->_filter['operator'] = (isset($this->_params[sprintf('%s.%s.%s', $this->getOption('label', 'prefix'), $this->getOption('label', 'operator'), $field)]))
-                                   ? $this->_params[sprintf('%s.%s.%s', $this->getOption('label', 'prefix'), $this->getOption('label', 'operator'), $field)]
-                                   : 'like';
+        $this->_filter['operator'] = ($this->_hasFieldParams('operator')) ? $this->_getFieldParams('operator') : 'like';
 
         $this->_filter['explode.concatenate'] = $this->getOption('explode', 'concatenate');
-        $this->_filter['explode.character']        = $this->getOption('explode', 'character');
+        $this->_filter['explode.character']   = $this->getOption('explode', 'character');
 
 
         switch(mb_strtolower($this->_filter['operator'], 'utf-8')) {
@@ -736,10 +766,10 @@ class FilterResultsComponent extends Component {
                    ? $this->_valueConcatenate()
                    : $this->_value();
         
-        $this->controller->request->data[$this->getOption('label', 'prefix')][$field] = $this->_params[sprintf('%s.%s', $this->getOption('label', 'prefix'), $field)];
+        $this->controller->request->data[$this->getOption('label', 'prefix')][$this->_filter['field']] = $this->_getFieldParams();
 
-        $this->controller->request->data[$this->getOption('label', 'prefix')][$this->getOption('label', 'fieldModel')][$field] = $this->_params[sprintf('%s.%s.%s', $this->getOption('label', 'prefix'), $this->getOption('label', 'fieldModel'), $field)];
-        $this->controller->request->data[$this->getOption('label', 'prefix')][$this->getOption('label', 'operator')][$field]   = $this->_params[sprintf('%s.%s.%s', $this->getOption('label', 'prefix'), $this->getOption('label', 'operator'), $field)];
+        $this->controller->request->data[$this->getOption('label', 'prefix')][$this->getOption('label', 'fieldModel')][$field] = $this->_getFieldParams('fieldModel');
+        $this->controller->request->data[$this->getOption('label', 'prefix')][$this->getOption('label', 'operator')][$field]   = $this->_getFieldParams('operator');
         
         return $condition;
     }
@@ -759,22 +789,21 @@ class FilterResultsComponent extends Component {
         /**
          * Verifica a existencia dos dois parâmetros
          */ 
-        if (!isset($this->_params[sprintf('%s.%s', $this->getOption('label', 'prefix'), $this->_filter['field'])])
-         || !isset($this->_params[sprintf('%s.%s2', $this->getOption('label', 'prefix'), $this->_filter['field'])]))
+        if (!$this->_hasFieldParams() || !$this->_hasFieldParams(null, true))
         {
                                 
-            if (isset($this->_params[sprintf('%s.%s', $this->getOption('label', 'prefix'), $this->_filter['field'])])) {
-                $$this->controller->request->data[$this->getOption('label', 'prefix')][$this->_filter['field']] = $this->_params[sprintf('%s.%s', $this->getOption('label', 'prefix'), $this->_filter['field'])];
+            if ($this->_hasFieldParams()) {
+                $$this->controller->request->data[$this->getOption('label', 'prefix')][$this->_filter['field']] = $this->_getFieldParams();
             }
 
-            if (isset($this->_params[sprintf('%s.%s2', $this->getOption('label', 'prefix'), $this->_filter['field'])])) {
-                $$this->controller->request->data[$this->getOption('label', 'prefix')][$this->_filter['field'].'2'] = $this->_params[sprintf('%s.%s2', $this->getOption('label', 'prefix'), $this->_filter['field'])];
+            if ($this->_hasFieldParams(null, true)) {
+                $$this->controller->request->data[$this->getOption('label', 'prefix')][$this->_filter['field'].'.between'] = $this->_getFieldParams(null, true);
             }
 
             return array();
         }
 
-        $this->_filter['value.between'] = $this->_params[sprintf('%s.%s2', $this->getOption('label', 'prefix'), $this->_filter['field'])];
+        $this->_filter['value.between'] = $this->_getFieldParams(null, true);
         
 
         /** 
@@ -792,8 +821,8 @@ class FilterResultsComponent extends Component {
         
         $condition = array(sprintf('%s %s', $this->_filter['fieldModel'], $this->_filter['operator']) => $this->_filter['value']);
         
-        $this->controller->request->data[$this->getOption('label', 'prefix')][$this->_filter['field']]     = $this->_params[sprintf('%s.%s', $this->getOption('label', 'prefix'), $this->_filter['field'])];
-        $this->controller->request->data[$this->getOption('label', 'prefix')][$this->_filter['field'].'2'] = $this->_params[sprintf('%s.%s2', $this->getOption('label', 'prefix'), $this->_filter['field'])];
+        $this->controller->request->data[$this->getOption('label', 'prefix')][$this->_filter['field']]            = $this->_getFieldParams();
+        $this->controller->request->data[$this->getOption('label', 'prefix')][$this->_filter['field'].'.between'] = $this->_getFieldParams(null, true);
 
         return $condition;
     }

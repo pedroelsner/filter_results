@@ -33,15 +33,44 @@ class FilterFormHelper extends FormHelper {
     protected $_component;
 
 /**
- * Setup
+ * Default settings
  *
- * @param object $component Referencia ao componente 'Filter Results'
+ * @var array
  * @access protected
  * @since 1.0
  */
-    protected function _setup(FilterResultsComponent $component) {
-        $this->_component = $component;
+    protected $_options = array(
+        'operators' => array(
+            'LIKE'       => 'contendo',
+            'NOT LIKE'   => 'não contendo',
+            'LIKE BEGIN' => 'começando com',
+            'LIKE END'   => 'terminando com',
+            '='  => 'iqual a',
+            '!=' => 'diferente de',
+            '>'  => 'maior que',
+            '>=' => 'maior ou igual',
+            '<'  => 'menor que',
+            '<=' => 'menor ou igual'
+        )
+    );
+
+/**
+ * Construct
+ * 
+ * @param object $view
+ * @param array $settings
+ * @access public
+ * @since 2.0
+ */
+public function __construct(View $view, $settings = array()) {
+    parent::__construct($view, $settings);
+
+    foreach ($view->viewVars as $key => $value) {
+        if (strpos($key, 'FilterResults') > -1 && is_object($value)) {
+            $this->_component = $value;
+        }
     }
+}
 
 /**
  * Check if component has been inicialized
@@ -57,17 +86,15 @@ class FilterFormHelper extends FormHelper {
 /**
  * Create
  *
- * @param object $component
+ * @param mixed $model
  * @param array $settings
  * @return string
  * @access public
  * @since  1.0
  */
-    public function create(FilterResultsComponent $component, $settings = array()) {
+    public function create($model = null, $settings = array()) {
         
-        self::_setup($component);
-        
-        if (!self::_hasComponent()) {
+        if (!$this->_hasComponent()) {
             return '';
         }
         
@@ -82,10 +109,10 @@ class FilterFormHelper extends FormHelper {
             )
         );
         
-        $settings = array_merge($settings, $default);
-        $settings = array_merge($settings, $this->_component->getOption('form'));
+        $settings = array_merge($default, $settings);
+        $settings = array_merge($this->_component->getOption('form'), $settings);
         
-        return parent::create(null, $settings);
+        return parent::create($model, $settings);
     }
 
 /**
@@ -99,7 +126,7 @@ class FilterFormHelper extends FormHelper {
  */
     public function end($submit = null, $settings = array()) {
 
-        if (!self::_hasComponent()) {
+        if (!$this->_hasComponent()) {
             return '';
         }
         
@@ -117,7 +144,7 @@ class FilterFormHelper extends FormHelper {
  */
     public function submit($name, $settings = array()) {
 
-        if (!self::_hasComponent()) {
+        if (!$this->_hasComponent()) {
             return '';
         }
         
@@ -136,7 +163,7 @@ class FilterFormHelper extends FormHelper {
  */
     public function input($name, $settings = array()) {
 
-        if (!self::_hasComponent()) {
+        if (!$this->_hasComponent()) {
             return '';
         }
         
@@ -169,7 +196,7 @@ class FilterFormHelper extends FormHelper {
  */
     public function selectOperators($name, $options = null, $settings = array()) {
 
-        if (!self::_hasComponent()) {
+        if (!$this->_hasComponent()) {
             return '';
         }
         
@@ -179,18 +206,7 @@ class FilterFormHelper extends FormHelper {
         
         
         if (!is_array($options)) {
-            $options = array(
-                'LIKE'       => __('contendo', true),
-                'NOT LIKE'   => __('não contendo', true),
-                'LIKE BEGIN' => __('começando com', true),
-                'LIKE END'   => __('terminando com', true),
-                '='    => __('iqual a', true),
-                '!='   => __('diferente de', true),
-                '>'    => __('maior que', true),
-                '>='   => __('maior ou igual', true),
-                '<'    => __('menor que', true),
-                '<='   => __('menor ou igual', true)
-            );
+            $options = $this->_options['operators'];
         }
         
         if (!is_array($settings)) {
@@ -237,7 +253,7 @@ class FilterFormHelper extends FormHelper {
         
         $settings['options'] = $options;
 
-        return self::input(sprintf('%s.%s.%s', $this->_component->getOption('label', 'prefix'), $this->_component->$this->_component->getOption('label', 'fieldModel'), $name), $settings);
+        return $this->input(sprintf('%s.%s.%s', $this->_component->getOption('label', 'prefix'), $this->_component->$this->_component->getOption('label', 'fieldModel'), $name), $settings);
     }
     
 }

@@ -38,7 +38,20 @@ var $components = array(
 );
 
 var $helpers = array(
-    'FilterResults.FilterForm'
+    'FilterResults.FilterForm' => array(
+        'operators' => array(
+            'LIKE'       => 'containing',
+            'NOT LIKE'   => 'not containing',
+            'LIKE BEGIN' => 'starting with',
+            'LIKE END'   => 'ending with',
+            '='  => 'equal to',
+            '!=' => 'different',
+            '>'  => 'greater than',
+            '>=' => 'greater or equal to',
+            '<'  => 'less than',
+            '<=' => 'less or equal to'
+        )
+    )
 );
 </pre>
 
@@ -120,7 +133,7 @@ Now we just have to make the form on View at the top of the table.
 
 File __/app/View/Users/index.ctp)__
 <pre>
-echo $this->FilterForm->create($FilterResults);
+echo $this->FilterForm->create();
 echo $this->FilterForm->input('filter1');
 echo $this->FilterForm->end(__('Filter', true));
 </pre>
@@ -289,7 +302,7 @@ function index() {
 
 File __/app/View/Users/index.ctp__
 <pre>
-echo $this->FilterForm->create($FilterResults);
+echo $this->FilterForm->create();
 echo $this->FilterForm->input('filter2', array('class' => 'select-box'));
 echo $this->FilterForm->input('filter1');
 echo $this->FilterForm->end(__('Filter', true));
@@ -322,7 +335,7 @@ __NOTE__: Note that this time we filter `filter1` without any parameters. This i
 
 File __/app/View/Users/index.ctp__
 <pre>
-echo $this->FilterForm->create($FilterResults);
+echo $this->FilterForm->create();
 echo $this->FilterForm->selectFields('filter1', null, array('class' => 'select-box'));
 echo $this->FilterForm->selectOperators('filter1');
 echo $this->FilterForm->input('filter1');
@@ -337,7 +350,7 @@ For this, we change only the View.
 
 Arquivo __/app/View/Users/index.ctp__
 <pre>
-echo $this->FilterForm->create($FilterResults);
+echo $this->FilterForm->create();
 
 echo $this->FilterForm->selectFields('filter1',
         array(
