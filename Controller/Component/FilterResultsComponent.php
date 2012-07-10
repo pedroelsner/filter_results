@@ -623,11 +623,13 @@ class FilterResultsComponent extends Component {
                     $this->_filter['value.before'] = $this->_defaultOptionsValue('before');
                     $this->_filter['value.after']  = $this->_defaultOptionsValue('after');
 
-
-                    if (!isset($this->_filter['value']) || is_array($this->_filter['value'])) {
-                        $this->_filter['value'] = $this->_getFieldParams();
-                    } else {
+                    if (!isset($this->_filter['value'])) {
                         $this->_filter['value'] = (isset($this->_filter['select'])) ? $this->_getFieldParams() : '';
+                    } else {
+                        if (is_array($this->_filter['value'])) {
+                            $this->_filter['select'] = $this->_filter['value'];
+                            $this->_filter['value'] = $this->_getFieldParams();
+                        }
                     }
                     
                     if (empty($this->_filter['value'])) {
@@ -650,17 +652,17 @@ class FilterResultsComponent extends Component {
                         }
                     }
 
-
                     switch (mb_strtolower($this->_filter['operator'], 'utf-8')) {
                         case 'between':
                             $condition += $this->_conditionsForOperatorBetween();    
                             break;
                         
                         default:
+
                             $condition += $this->_isMayExplodeValue()
                                         ? $this->_valueConcatenate()
                                         : $this->_value();
-
+                            debug($condition);
                             $this->controller->request->data[$this->getOption('label', 'prefix')][$this->_filter['field']] = $this->_getFieldParams();
                             break;
                     }
@@ -837,7 +839,14 @@ protected function _getFieldParams($more = null, $between = false) {
  */
     protected function _defaultOptionsValue($option) {
 
-        $default = (isset($this->_filter['value'][$option])) ? $this->_filter['value'][$option] : '';
+        if (isset($this->_filter['value'])) {
+            if (is_array($this->_filter['value'])) {
+                $default = (isset($this->_filter['value'][$option])) ? $this->_filter['value'][$option] : '';
+            } else {
+                $default = '';
+            }
+        }
+
 
         if (!$default) {
             switch (mb_strtolower($this->_filter['operator'], 'utf-8')) {
