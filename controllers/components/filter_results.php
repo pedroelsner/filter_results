@@ -848,15 +848,18 @@ protected function _getFieldParams($more = null, $between = false) {
  */
     protected function _defaultOptionsValue($option) {
 
+        $default = null;
+
         if (isset($this->_filter['value'])) {
             if (is_array($this->_filter['value'])) {
-                $default = (isset($this->_filter['value'][$option])) ? $this->_filter['value'][$option] : '';
-            } else {
-                $default = '';
+                if (isset($this->_filter['value'][$option])) {
+                    $default = $this->_filter['value'][$option];
+                } 
             }
         }
 
-        if (!$default) {
+
+        if ($default == null) {
             switch (mb_strtolower($this->_filter['operator'], 'utf-8')) {
                 case 'like':
                 case 'not like':
@@ -864,6 +867,7 @@ protected function _getFieldParams($more = null, $between = false) {
                     break;
                 
                 default:
+                    $default = '';
                     break;
             }
         }
