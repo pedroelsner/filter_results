@@ -604,7 +604,7 @@ class FilterResultsComponent extends Object {
                 default:
                     
                     $this->_filter = array();
-                    $this->_filter['field'] = $field;
+                    $this->_filter['field'] = $field;                    
 
                     /**
                      * Check the parameter's value, if empty break
@@ -633,7 +633,7 @@ class FilterResultsComponent extends Object {
 
 
                     if (!isset($this->_filter['value'])) {
-                        $this->_filter['value'] = (isset($this->_filter['select'])) ? $this->_getFieldParams() : '';
+                        $this->_filter['value'] = $this->_getFieldParams();
                     } else {
                         if (is_array($this->_filter['value'])) {
                             $this->_filter['select'] = $this->_filter['value'];
@@ -686,7 +686,7 @@ class FilterResultsComponent extends Object {
 protected function _hasFieldParams($more = null, $between = false) {
     
     if ($between) {
-        return isset($this->_params[sprintf('%s.%s.between', $this->getOption('label', 'prefix'), $this->_filter['field'])]);
+        return isset($this->_params[sprintf('%s.%s-between', $this->getOption('label', 'prefix'), $this->_filter['field'])]);
     }
 
     if (is_null($more)) {
@@ -703,7 +703,7 @@ protected function _getFieldParams($more = null, $between = false) {
     }
     
     if ($between) {
-        return $this->_params[sprintf('%s.%s.between', $this->getOption('label', 'prefix'), $this->_filter['field'])];
+        return $this->_params[sprintf('%s.%s-between', $this->getOption('label', 'prefix'), $this->_filter['field'])];
     }
 
     if (is_null($more)) {
@@ -797,6 +797,7 @@ protected function _getFieldParams($more = null, $between = false) {
             return array();
         }
 
+
         /**
          * Verifica a existencia dos dois parâmetros
          */ 
@@ -808,13 +809,13 @@ protected function _getFieldParams($more = null, $between = false) {
             }
 
             if ($this->_hasFieldParams(null, true)) {
-                $$this->controller->data[$this->getOption('label', 'prefix')][$this->_filter['field'].'.between'] = $this->_getFieldParams(null, true);
+                $$this->controller->data[$this->getOption('label', 'prefix')][$this->_filter['field'].'-between'] = $this->_getFieldParams(null, true);
             }
 
             return array();
         }
 
-        $this->_filter['value.between'] = $this->_getFieldParams(null, true);
+        $this->_filter['value-between'] = $this->_getFieldParams(null, true);
         
 
         /** 
@@ -823,17 +824,17 @@ protected function _getFieldParams($more = null, $between = false) {
         if (isset($this->_filter['between']['date'])) {
             if ($this->_filter['between']['date']) {
                 $this->_filter['value']         = implode(preg_match("~\/~", $this->_filter['value'])         == 0 ? "/" : "-", array_reverse(explode(preg_match("~\/~", $this->_filter['value'])         == 0 ? "-" : "/", $this->_filter['value'])));
-                $this->_filter['value.between'] = implode(preg_match("~\/~", $this->_filter['value.between']) == 0 ? "/" : "-", array_reverse(explode(preg_match("~\/~", $this->_filter['value.between']) == 0 ? "-" : "/", $this->_filter['value.between'])));
+                $this->_filter['value-between'] = implode(preg_match("~\/~", $this->_filter['value-between']) == 0 ? "/" : "-", array_reverse(explode(preg_match("~\/~", $this->_filter['value-between']) == 0 ? "-" : "/", $this->_filter['value-between'])));
             }
         }
                             
-        $this->_filter['value']    = array($this->_filter['value'], $this->_filter['value.between']);
+        $this->_filter['value']    = array($this->_filter['value'], $this->_filter['value-between']);
         $this->_filter['operator'] = 'BETWEEN ? AND ?';
         
         $condition = array(sprintf('%s %s', $this->_filter['fieldModel'], $this->_filter['operator']) => $this->_filter['value']);
         
         $this->controller->data[$this->getOption('label', 'prefix')][$this->_filter['field']]            = $this->_getFieldParams();
-        $this->controller->data[$this->getOption('label', 'prefix')][$this->_filter['field'].'.between'] = $this->_getFieldParams(null, true);
+        $this->controller->data[$this->getOption('label', 'prefix')][$this->_filter['field'].'-between'] = $this->_getFieldParams(null, true);
 
         return $condition;
     }
