@@ -158,12 +158,13 @@ public function __construct(View $view, $settings = array()) {
  * Input
  *
  * @param string $name
- * @param array $settings
+ * @param array  $settings
+ * @param array  $between
  * @return string
  * @access public
  * @since 1.0
  */
-    public function input($name, $settings = array()) {
+    public function input($name, $settings = array(), $between = array()) {
 
         if (!$this->_hasComponent()) {
             return '';
@@ -175,12 +176,14 @@ public function __construct(View $view, $settings = array()) {
         
         
         $settings['options'] = $this->_component->getFieldSelect($name);
-
         $input = parent::input(sprintf('%s.%s', $this->_component->getOption('label', 'prefix'), $name), $settings);
 
+        
         if($this->_component->getFieldOperator($name) == 'between') {
+            $between['options'] = $this->_component->getFieldSelect($name);
+
             $input .= (isset($setting['between']['text'])) ? $setting['between']['text'] : ' ';
-            $input .= parent::input(sprintf('%s.%s2', $this->_component->getOption('label', 'prefix'), $name), $settings);
+            $input .= parent::input(sprintf('%s.%s-between', $this->_component->getOption('label', 'prefix'), $name), $between);
         }
         
         return $input;
