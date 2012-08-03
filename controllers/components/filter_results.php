@@ -504,6 +504,9 @@ class FilterResultsComponent extends Object {
                 }
             }
         }
+
+        // Mantem parâmetros PASS e NAMED da aplicação
+        $url = array_merge($this->controller->params['pass'], $this->controller->params['named'], $url);
         
         $this->controller->redirect($url, null, true);
     }
