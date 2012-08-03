@@ -505,6 +505,15 @@ class FilterResultsComponent extends Object {
             }
         }
 
+        
+        // Remove filtros do NAMED
+        $named = $this->controller->params['named'];
+        foreach ($named as $key => $value) {
+            if (!(strpos($this->_decrypt($key), sprintf('%s.', $this->getOption('label', 'prefix'))) === false)) {
+                unset($named[$key]);
+            }
+        }
+
         // Mantem parâmetros PASS e NAMED da aplicação
         $url = array_merge($this->controller->params['pass'], $this->controller->params['named'], $url);
         
