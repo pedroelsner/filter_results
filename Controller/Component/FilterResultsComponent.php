@@ -475,7 +475,7 @@ class FilterResultsComponent extends Component {
  * @since 2.0
  */
     protected function _redirectToNamedUrl($url = array(), $get = array()) {
-    
+
         foreach ($this->controller->request['url'] as $key => $value) {
             if ($key != 'url') {
                 $get += array($key => $value);
@@ -497,6 +497,9 @@ class FilterResultsComponent extends Component {
             }
         }
         
+        // Mantem parâmetros PASS e NAMED da aplicação
+        $url = array_merge($this->controller->request->params['pass'], $this->controller->request->params['named'], $url);
+
         $this->controller->redirect($url, null, true);
     }
 
