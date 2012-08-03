@@ -200,7 +200,7 @@ class FilterResultsComponent extends Object {
  * @since 1.0
  */
     protected function _encrypt($string) {
-        return (!is_string($string)) ? '' : base64_encode($string);
+        return (!is_string($string)) ? '' : base64_encode(base64_encode($string));
     }
 
 /**
@@ -212,7 +212,7 @@ class FilterResultsComponent extends Object {
  * @since  1.0
  */
     protected function _decrypt($string) {
-        return (!is_string($string)) ? '' : base64_decode($string);
+        return (!is_string($string)) ? '' : base64_decode(base64_decode($string));
     }
 
 /**
@@ -505,8 +505,8 @@ class FilterResultsComponent extends Object {
             }
         }
 
-        
-        // Remove filtros do NAMED
+
+        // Remove filters of NAMED
         $named = $this->controller->params['named'];
         foreach ($named as $key => $value) {
             if (!(strpos($this->_decrypt($key), sprintf('%s.', $this->getOption('label', 'prefix'))) === false)) {
@@ -514,7 +514,7 @@ class FilterResultsComponent extends Object {
             }
         }
 
-        // Mantem parâmetros PASS e NAMED da aplicação
+        // Keep application's NAMED params on redirect
         $url = array_merge($this->controller->params['pass'], $this->controller->params['named'], $url);
         
         $this->controller->redirect($url, null, true);
