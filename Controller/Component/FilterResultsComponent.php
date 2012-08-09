@@ -505,6 +505,12 @@ class FilterResultsComponent extends Component {
                 unset($named[$key]);
             }
         }
+        // Remove 'page' param
+        foreach ($named as $key => $value) {
+            if ($key == 'page') {
+                unset($named[$key]);
+            }
+        }
 
         // Keep application's NAMED params on redirect
         $url = array_merge($this->controller->request->params['pass'], $named, $url);
