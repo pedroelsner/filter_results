@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /**
  * Helper to create form fields.
  *
@@ -258,7 +258,7 @@ public function __construct(View $view, $settings = array()) {
         
         $settings['options'] = $options;
 
-        return $this->input(sprintf('%s.%s.%s', $this->_component->getOption('label', 'prefix'), $this->_component->$this->_component->getOption('label', 'fieldModel'), $name), $settings);
+        return $this->input(sprintf('%s.%s.%s', $this->_component->getOption('label', 'prefix'), $this->_component->getOption('label', 'fieldModel'), $name), $settings);
     }
     
 }
