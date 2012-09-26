@@ -417,6 +417,14 @@ $this->FilterResults->addFilters(
 );
 </pre>
 
+# Relacionamentos HABTM
+
+Por padrão, nos relacionamentos HABTM o CakePHP realiza várias consultas a parte e depois faz um `merge` nos resultados em um unico `array`. Você já deve ter percebido isso, mas se não, verifique a janela de debug enquanto você faz `find()` em uma relação HABTM.
+
+Para filtramos nessas relações, precisamos criar alguns "hacks" para que o CakePHP gere um único `select`, assim o plugin filtra o resultado com comandos `where` simples.
+
+Todas as informações e explicações necessárias para criar os "hacks" você encontra neste tutorial: [http://pedroelsner.com/2012/09/pesquisando-em-associacoes-habtm-no-cakephp/](http://pedroelsner.com/2012/09/pesquisando-em-associacoes-habtm-no-cakephp/ "Pesquisando em relações HABTM no CakePHP")
+
 # Copyright e Licença
 
 Copyright 2012, Pedro Elsner (http://pedroelsner.com/)
