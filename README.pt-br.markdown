@@ -425,3 +425,4 @@ Licenciado pela Creative Commons 3.0 (http://creativecommons.org/licenses/by/3.0
 ## Agradecimentos
 
 * Vinícius Arantes (vinicius.big@gmail.com)
+* Theodoro Granero (theogranero@gmail.com)
