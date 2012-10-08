@@ -66,7 +66,7 @@ class FilterFormHelper extends FormHelper {
     public function __construct($settings = array()) {
         parent::__construct($settings);
 
-        $this->_options = array_merge($this->_options, $settings);
+        $this->_options = is_array($settings) ? array_merge($this->_options, $settings) : $this->_options;
     }
     
 /**
