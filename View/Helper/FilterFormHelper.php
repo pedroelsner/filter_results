@@ -221,7 +221,7 @@ public function __construct(View $view, $settings = array()) {
         
         $settings['options'] = $options;
         
-        return parent::input(sprintf('%s.%s.%s', $this->_component->getOption('label', 'prefix'), $this->_component->$this->_component->getOption('label', 'operator'), $name), $settings);
+        return parent::input(sprintf('%s.%s.%s', $this->_component->getOption('label', 'prefix'), $this->_component->getOption('label', 'operator'), $name), $settings);
         
     }
     
@@ -247,7 +247,7 @@ public function __construct(View $view, $settings = array()) {
             return '';
         }
         
-        
+
         if (!is_array($options)) {
             $options = $this->_component->getModelFields();
         }
@@ -258,7 +258,7 @@ public function __construct(View $view, $settings = array()) {
         
         $settings['options'] = $options;
 
-        return $this->input(sprintf('%s.%s.%s', $this->_component->getOption('label', 'prefix'), $this->_component->getOption('label', 'fieldModel'), $name), $settings);
+        return parent::input(sprintf('%s.%s.%s', $this->_component->getOption('label', 'prefix'), $this->_component->getOption('label', 'fieldModel'), $name), $settings);
     }
     
 }

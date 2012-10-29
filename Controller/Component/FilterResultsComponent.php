@@ -356,6 +356,10 @@ class FilterResultsComponent extends Component {
  */
     public function _searchSelectOption($options) {
 
+        if (!is_array($options)) {
+            return array();
+        }
+
         $result = array();
         
         foreach ($options as $key => $value) {
@@ -662,6 +666,7 @@ class FilterResultsComponent extends Component {
                                                           ? $this->_filter['explode']['character']
                                                           : $this->getOption('explode', 'character');
 
+
                     if (!isset($this->_filter['explode'])) {
                         $this->_filter['explode'] = null;
                     } else {
@@ -752,6 +757,7 @@ protected function _getFieldParams($more = null, $between = false) {
 
         $this->_filter['operator'] = ($this->_hasFieldParams('operator')) ? $this->_getFieldParams('operator') : 'like';
 
+        $this->_filter['explode'] = true;
         $this->_filter['explode.concatenate'] = $this->getOption('explode', 'concatenate');
         $this->_filter['explode.character']   = $this->getOption('explode', 'character');
 
@@ -968,18 +974,18 @@ protected function _getFieldParams($more = null, $between = false) {
  * Get the fields of model automaticaly
  *
  * @return array
- * @access protected
+ * @access public
  * @since 1.0
  */
-    protected function getModelFields() {
+    public function getModelFields() {
 
-        if (!isset($this->controller->modelNames[0])) {
+        if (!isset($this->controller->uses[0])) {
             return array();
         }
         
         $fields = array();
-        foreach($this->controller->{$this->controller->modelNames[0]}->_schema as $key => $value) {
-            $fields[sprintf('%s.%s', $this->controller->modelNames[0], $key)] = $key;
+        foreach($this->controller->{$this->controller->uses[0]}->_schema as $key => $value) {
+            $fields[sprintf('%s.%s', $this->controller->uses[0], $key)] = $key;
         }
         return $fields;
     }
@@ -995,9 +1001,12 @@ protected function _getFieldParams($more = null, $between = false) {
     public function getFieldOperator($fieldName) {
 
         $options = $this->_getFilterOptions($fieldName, $this->getOption('filters'));
-        foreach ($options as $key => $value) {
-            if (isset($value['operator'])) {
-                return mb_strtolower($value['operator'], 'utf-8');
+        
+        if (is_array($options)) {
+            foreach ($options as $key => $value) {
+                if (isset($value['operator'])) {
+                    return mb_strtolower($value['operator'], 'utf-8');
+                }
             }
         }
 
