@@ -654,7 +654,7 @@ class FilterResultsComponent extends Component {
                         }
                     }
                     
-                    if (empty($this->_filter['value'])) {
+                    if (empty($this->_filter['value']) && $this->_filter['value'] !== '0') {
                         break;
                     }
                     
