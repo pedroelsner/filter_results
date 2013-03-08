@@ -432,3 +432,4 @@ Licensed under Creative Commons 3.0 (http://creativecommons.org/licenses/by/3.0/
 
 * Vinícius Arantes (vinicius.big@gmail.com)
 * Francys Reymer (francys.reymer@gmail.com)
+* Geazy El-Hanã de Oliveira (geazi.oliveira@jacotei.com.br)
