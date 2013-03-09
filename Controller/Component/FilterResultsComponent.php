@@ -1057,6 +1057,8 @@ protected function _getFieldParams($more = null, $between = false) {
  */
     public function setPaginate($option, $value = null) {
         $setting = (is_array($option)) ? $option : array($option => $value);
+        if (!(is_array($setting))) return;
+
         $this->controller->paginate = array_merge($this->controller->paginate, $setting);
     }
     
