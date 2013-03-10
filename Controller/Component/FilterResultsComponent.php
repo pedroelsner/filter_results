@@ -456,7 +456,7 @@ class FilterResultsComponent extends Component {
         }
         
         if ($this->_check() > 0) {
-            
+
             $this->_conditions = $this->_filterFields($this->_options['filters']);
 
             if ($this->getOption('auto', 'paginate')) {
@@ -566,7 +566,7 @@ class FilterResultsComponent extends Component {
                 case 'not':
                 case 'and':
                 case 'or':
-                    
+
                     $conditionOfFilter = $this->_filterFields($value);
                     if (count($conditionOfFilter) > 0) {
                         if (!isset($condition[$key])) {
@@ -606,7 +606,7 @@ class FilterResultsComponent extends Component {
         
         foreach ($options as $key => $value) {
 
-            switch (strtolower($key)) {
+            switch (mb_strtolower($key, 'utf-8')) {
                 case 'not':
                 case 'and':
                 case 'or':
@@ -617,6 +617,7 @@ class FilterResultsComponent extends Component {
                 
                 default:
                     
+
                     $this->_filter = array();
                     $this->_filter['field'] = $field;
 
@@ -682,15 +683,19 @@ class FilterResultsComponent extends Component {
                         
                         default:
 
-                            $condition += $this->_isMayExplodeValue()
-                                        ? $this->_valueConcatenate()
-                                        : $this->_value();
-                            
+                            debug($this->_valueConcatenate());
+
+                            $condition[] = ($this->_isMayExplodeValue())
+                                         ? $this->_valueConcatenate()
+                                         : $this->_value();
+
                             $this->controller->request->data[$this->getOption('label', 'prefix')][$this->_filter['field']] = $this->_getFieldParams();
                             break;
                     }
 
             }
+
+            
         }
         
         return $condition;
