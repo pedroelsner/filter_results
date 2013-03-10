@@ -683,8 +683,6 @@ class FilterResultsComponent extends Component {
                         
                         default:
 
-                            debug($this->_valueConcatenate());
-
                             $condition[] = ($this->_isMayExplodeValue())
                                          ? $this->_valueConcatenate()
                                          : $this->_value();
@@ -793,9 +791,9 @@ protected function _getFieldParams($more = null, $between = false) {
         }
         
 
-        $condition = $this->_isMayExplodeValue()
-                   ? $this->_valueConcatenate()
-                   : $this->_value();
+        $condition[] = ($this->_isMayExplodeValue())
+                     ? $this->_valueConcatenate()
+                     : $this->_value();
         
         $this->controller->request->data[$this->getOption('label', 'prefix')][$this->_filter['field']] = $this->_getFieldParams();
 
