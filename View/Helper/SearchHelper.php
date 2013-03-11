@@ -1,6 +1,6 @@
 ﻿<?php
 /**
- * Helper to create form fields.
+ * Helper to create search form.
  *
  * Licenciado pela Creative Commons 3.0
  *
@@ -8,7 +8,7 @@
  * @copyright  Copyright 2012, Pedro Elsner (http://pedroelsner.com/)
  * @author     Pedro Elsner <pedro.elsner@gmail.com>
  * @license    Creative Commons 3.0 (http://creativecommons.org/licenses/by/3.0/)
- * @since      2.0
+ * @since      2.1
  */
 
 App::uses('FormHelper', 'View/Helper');
@@ -18,13 +18,23 @@ App::uses('FormHelper', 'View/Helper');
  *
  * @use        FormHelper
  * @package    filter_results
- * @subpackage filter_results.filter_form
- * @link       http://www.github.com/pedroelsner/filter_results/tree/2.0/View/Helper/FilterFormHelper.php
+ * @subpackage filter_results.search
+ * @link       http://www.github.com/pedroelsner/filter_results/tree/2.1/View/Helper/SearchHelper.php
  */
-class FilterFormHelper extends FormHelper {  
+class SearchHelper extends FormHelper {  
 
 /**
- * Save controller's reference
+ * Name of component
+ * NEVER CHANGE IT
+ *
+ * @var string
+ * @access private
+ * @since 2.1
+ */
+    private $_componentName = 'Filter';
+
+/**
+ * Save component's reference
  *
  * @var object
  * @access protected
@@ -41,16 +51,16 @@ class FilterFormHelper extends FormHelper {
  */
     protected $_options = array(
         'operators' => array(
-            'LIKE'       => 'contendo',
-            'NOT LIKE'   => 'não contendo',
-            'LIKE BEGIN' => 'começando com',
-            'LIKE END'   => 'terminando com',
-            '='  => 'iqual a',
-            '!=' => 'diferente de',
-            '>'  => 'maior que',
-            '>=' => 'maior ou igual',
-            '<'  => 'menor que',
-            '<=' => 'menor ou igual'
+            'LIKE'        => 'contendo',
+            'NOT LIKE'    => 'não contendo',
+            'LIKE BEGIN'  => 'começando com',
+            'LIKE END'    => 'terminando com',
+            '='           => 'iqual a',
+            '!='          => 'diferente de',
+            '>'           => 'maior que',
+            '>='          => 'maior ou igual',
+            '<'           => 'menor que',
+            '<='          => 'menor ou igual'
         )
     );
 
@@ -64,14 +74,16 @@ class FilterFormHelper extends FormHelper {
  */
 public function __construct(View $view, $settings = array()) {
     parent::__construct($view, $settings);
+    $this->_options = array_merge($this->_options, $settings);
 
+    /**
+     * Autodetect FilterResults FilterComponent
+     */
     foreach ($view->viewVars as $key => $value) {
-        if (strpos($key, 'FilterResults') > -1 && is_object($value)) {
+        if (strpos($key, $this->_componentName) > -1 && is_object($value)) {
             $this->_component = $value;
         }
     }
-
-    $this->_options = array_merge($this->_options, $settings);
 }
 
 /**
@@ -92,28 +104,25 @@ public function __construct(View $view, $settings = array()) {
  * @param array $settings
  * @return string
  * @access public
- * @since  1.0
+ * @since 1.0
  */
     public function create($model = null, $settings = array()) {
-        
+
         if (!$this->_hasComponent()) {
             return '';
         }
-        
         if (!is_array($settings)) {
             $settings = array();
         }
-        
         $default = array(
             'inputDefaults' => array(
                 'label' => false,
                 'div'   => false
             )
         );
-        
         $settings = array_merge($default, $settings);
         $settings = array_merge($this->_component->getOption('form'), $settings);
-        
+
         return parent::create($model, $settings);
     }
 
@@ -127,11 +136,11 @@ public function __construct(View $view, $settings = array()) {
  * @since 1.0
  */
     public function end($submit = null, $settings = array()) {
-
+        
         if (!$this->_hasComponent()) {
             return '';
         }
-        
+
         return parent::end($submit, $settings);
     }
 
@@ -169,18 +178,18 @@ public function __construct(View $view, $settings = array()) {
         if (!$this->_hasComponent()) {
             return '';
         }
-        
         if (!$this->_component->hasField($name)) {
             return '';
         }
         
-        
-        $settings['options'] = $this->_component->getFieldSelect($name);
+        $settings['options'] = $this->_component->getFieldSelectOptions($name);
         $input = parent::input(sprintf('%s.%s', $this->_component->getOption('label', 'prefix'), $name), $settings);
 
-        
+        /**
+         * For operator between
+         */
         if($this->_component->getFieldOperator($name) == 'between') {
-            $between['options'] = $this->_component->getFieldSelect($name);
+            $between['options'] = $this->_component->getFieldSelectOptions($name);
 
             $input .= (isset($setting['between']['text'])) ? $setting['between']['text'] : ' ';
             $input .= parent::input(sprintf('%s.%s-between', $this->_component->getOption('label', 'prefix'), $name), $between);
@@ -204,25 +213,18 @@ public function __construct(View $view, $settings = array()) {
         if (!$this->_hasComponent()) {
             return '';
         }
-        
         if (!$this->_component->hasField($name)) {
             return '';
         }
-        
-        
         if (!is_array($options)) {
             $options = $this->_options['operators'];
         }
-        
         if (!is_array($settings)) {
             $settings = array();
         }
-        
-        
         $settings['options'] = $options;
         
         return parent::input(sprintf('%s.%s.%s', $this->_component->getOption('label', 'prefix'), $this->_component->getOption('label', 'operator'), $name), $settings);
-        
     }
     
 /**
@@ -242,20 +244,15 @@ public function __construct(View $view, $settings = array()) {
         if (!$this->_hasComponent()) {
             return '';
         }
-        
         if (!$this->_component->hasField($name)) {
             return '';
         }
-        
-
         if (!is_array($options)) {
             $options = $this->_component->getModelFields();
         }
-        
         if (!is_array($settings)) {
             $settings = array();
         }
-        
         $settings['options'] = $options;
 
         return parent::input(sprintf('%s.%s.%s', $this->_component->getOption('label', 'prefix'), $this->_component->getOption('label', 'fieldModel'), $name), $settings);
