@@ -12,14 +12,14 @@ Compatível com CakePHP 2.3 + Paginate (Component)
 
 * Componente `FilterResults` foi alterado para apenas `Filter`;
 * Helper `FilterForm` foi alterado para apenas `Search`;
-* Armazena em `Session` ultimo filtro utilizado para cada `Action`;
+* Armazena em `Session` ultimo filtro utilizado e restaura na volta para a `Action`;
 * Operadores `IS NULL` e `NOT IS NULL` foram implementados;
 * Método `explode` disponível para qualquer combinação de filtros;
 * Reformulação na estrutura das funções;
 
 # Instalação
 
-Faça o download do plugin e coloque seu conteúdo dentro de `/app/Plugin/filter_results` ou em outro diretório para plugins do CakePHP.
+Faça o download do plugin e coloque seu conteúdo dentro de `/app/Plugin/FilterResults` ou em outro diretório para plugins do CakePHP.
 
 ## Ativação
 
@@ -35,7 +35,7 @@ Edite o arquivo __/app/AppController.php__:
 
 <pre>
 var $components = array(
-    'Filter.Filter' => array(
+    'FilterResults.Filter' => array(
         'auto' => array(
             'paginate' => false,
             'explode'  => true,  // recomendado
@@ -48,7 +48,7 @@ var $components = array(
 );
 
 var $helpers = array(
-    'Filter.Search'
+    'FilterResults.Search'
 );
 </pre>
 
