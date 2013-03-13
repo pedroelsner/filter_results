@@ -1,6 +1,6 @@
 # Filter Results
 
-Generates `conditions` to `find` methods in CakePHP 2.x from a search form.
+Generates `conditions` to `find` methods in CakePHP 2.0 from a search form.
 
 ## Compatibility
 
