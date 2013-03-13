@@ -26,7 +26,7 @@ Faça o download do plugin e coloque seu conteúdo dentro de `/app/Plugin/Filter
 Ative o plugin adicionando ao arquivo __/app/Config/bootstrap.php__:
 
 <pre>
-CakePlugin::load('Filter');
+CakePlugin::load('FilterResults');
 </pre>
 
 ## Configurações
