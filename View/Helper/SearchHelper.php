@@ -21,7 +21,7 @@ App::uses('FormHelper', 'View/Helper');
  * @subpackage filter_results.search
  * @link       http://www.github.com/pedroelsner/filter_results/tree/2.1/View/Helper/SearchHelper.php
  */
-class SearchHelper extends FormHelper {  
+class SearchHelper extends FormHelper {
 
 /**
  * Name of component
@@ -66,7 +66,7 @@ class SearchHelper extends FormHelper {
 
 /**
  * Construct
- * 
+ *
  * @param object $view
  * @param array $settings
  * @access public
@@ -96,7 +96,7 @@ public function __construct(View $view, $settings = array()) {
     protected function _hasComponent() {
         return is_object($this->_component);
     }
-    
+
 /**
  * Create
  *
@@ -136,7 +136,7 @@ public function __construct(View $view, $settings = array()) {
  * @since 1.0
  */
     public function end($submit = null, $settings = array()) {
-        
+
         if (!$this->_hasComponent()) {
             return '';
         }
@@ -153,14 +153,14 @@ public function __construct(View $view, $settings = array()) {
  * @access public
  * @since 1.0
  */
-    public function submit($name, $settings = array()) {
+    public function submit($name = null, $settings = array()) {
 
         if (!$this->_hasComponent()) {
             return '';
         }
-        
+
         return parent::submit($name, $settings);
-        
+
     }
 
 /**
@@ -181,7 +181,7 @@ public function __construct(View $view, $settings = array()) {
         if (!$this->_component->hasField($name)) {
             return '';
         }
-        
+
         $settings['options'] = $this->_component->getFieldSelectOptions($name);
         $input = parent::input(sprintf('%s.%s', $this->_component->getOption('label', 'prefix'), $name), $settings);
 
@@ -194,7 +194,7 @@ public function __construct(View $view, $settings = array()) {
             $input .= (isset($setting['between']['text'])) ? $setting['between']['text'] : ' ';
             $input .= parent::input(sprintf('%s.%s-between', $this->_component->getOption('label', 'prefix'), $name), $between);
         }
-        
+
         return $input;
     }
 
@@ -223,10 +223,10 @@ public function __construct(View $view, $settings = array()) {
             $settings = array();
         }
         $settings['options'] = $options;
-        
+
         return parent::input(sprintf('%s.%s.%s', $this->_component->getOption('label', 'prefix'), $this->_component->getOption('label', 'operator'), $name), $settings);
     }
-    
+
 /**
  * Select Fields
  *
@@ -257,5 +257,5 @@ public function __construct(View $view, $settings = array()) {
 
         return parent::input(sprintf('%s.%s.%s', $this->_component->getOption('label', 'prefix'), $this->_component->getOption('label', 'fieldModel'), $name), $settings);
     }
-    
+
 }
