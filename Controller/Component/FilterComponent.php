@@ -63,7 +63,7 @@ class FilterComponent extends Component {
  * @since 2.0
  */
     protected $_filter = array();
-    
+
 /**
  * Default settings
  *
@@ -116,7 +116,7 @@ class FilterComponent extends Component {
  * @since 1.0
  */
     protected $_params = array();
-   
+
 /**
  * Construct
  *
@@ -147,7 +147,7 @@ class FilterComponent extends Component {
          * Sent component to view (i don't like it, but we need)
          */
         $this->controller->set($this->_name, $this);
-    }   
+    }
 
 /**
  * Executed before the Controller::beforeFiler()
@@ -164,8 +164,8 @@ class FilterComponent extends Component {
          */
         $this->controller->set($this->_name, $this);
     }
-    
-/** 
+
+/**
  * Executed after the Controller::beforeFiler(), but before execute the requested action
  *
  * @param object $controller
@@ -195,7 +195,7 @@ class FilterComponent extends Component {
  * @since 1.0
  */
     public function shutdown(Controller $controller) {
-        
+
     }
 
 /**
@@ -209,7 +209,7 @@ class FilterComponent extends Component {
  * @since 1.0
  */
     public function beforeRedirect(Controller $controller, $url, $status = null, $exit = true) {
-        
+
     }
 
 /**
@@ -309,12 +309,12 @@ class FilterComponent extends Component {
 /**
  * Do everiting to create all conditions
  *
- * @return array 
+ * @return array
  * @access protected
  * @since 2.1
  */
     protected function _getConditions() {
-        
+
         /**
          * If have a POST DATA SUBMITED
          */
@@ -336,7 +336,11 @@ class FilterComponent extends Component {
         if ($this->_checkParamsNamed() > 0) {
             $this->_conditions = $this->_makeAllConditions($this->_options['filters']);
             if ($this->getOption('auto', 'paginate')) {
-                $this->controller->paginate['conditions'][] = $this->_conditions;
+                $paginator = $this->controller->Paginator;
+                if (!isset($paginator['conditions'])) {
+                    $paginator['conditions'] = array();
+                }
+                $paginator['conditions'] = Hash::merge($paginator['conditions'], $this->_conditions);
             }
             return $this->_conditions;
         }
@@ -356,8 +360,8 @@ class FilterComponent extends Component {
 
 /**
  * Return if has the searched field
- * 
- * @param string $field  
+ *
+ * @param string $field
  * @param type $filters
  * @return boolean
  * @access protected
@@ -411,8 +415,8 @@ class FilterComponent extends Component {
 
 /**
  * Return options field
- * 
- * @param string $field  
+ *
+ * @param string $field
  * @param type   $filters
  * @return array
  * @access protected
@@ -427,7 +431,7 @@ class FilterComponent extends Component {
                 case 'or':
                     $return = $this->_getFieldOptions($field, $value);
                     break;
-                
+
                 default:
                    if ($key == $field) {
                         $return = $value;
@@ -462,7 +466,7 @@ class FilterComponent extends Component {
             }
         }
         return $result;
-    }   
+    }
 
 /**
  * Composite array values for selection in the form
@@ -505,7 +509,7 @@ class FilterComponent extends Component {
 
             $filters = array($filters);
         }
-        
+
         if ($this->getOption('filters')) {
             $this->_options['filters'] += $filters;
         } else {
@@ -516,9 +520,9 @@ class FilterComponent extends Component {
 /**
  * Make the URL with NAMED fields.
  * Like this: example.com/cake/posts/index/Search.keywords:mykeyword/Search.tag_id:3
- * 
+ *
  * After, autoredirect to created URL
- * 
+ *
  * @param array $url
  * @param array $get
  * @access protected
@@ -543,7 +547,7 @@ class FilterComponent extends Component {
                 }
             }
         }
-        
+
         /**
          * Remove filters of NAMED
          */
@@ -580,12 +584,12 @@ class FilterComponent extends Component {
  * @since 1.0
  */
     protected function _checkParamsNamed() {
-        
+
         // Decrypt all NAMED parameters
         foreach ($this->controller->request->params['named'] as $key => $value) {
             $this->_params[$this->_decrypt($key)] = $this->_decrypt($value);
         }
-        
+
         $count = 0;
         foreach ($this->_params as $key => $value) {
             if (strpos($key,$this->getOption('label', 'prefix')) > -1) {
@@ -626,7 +630,7 @@ class FilterComponent extends Component {
                         }
                     }
                     break;
-                
+
                 default:
                     $condition += (is_array($value))
                          ? $this->_makeConditions($key, $value)
@@ -647,11 +651,11 @@ class FilterComponent extends Component {
  * @since 1.0
  */
     protected function _makeConditions($field, $options = null, $condition = array()) {
-        
+
         if (!isset($options)) {
             return $this->_makeConditionsWithoutOptions($field);
         }
-        
+
         foreach ($options as $key => $value) {
             switch (mb_strtolower($key, 'utf-8')) {
                 case 'not':
@@ -661,15 +665,15 @@ class FilterComponent extends Component {
                         $key => $this->_makeConditions($field, $value)
                     );
                     break;
-                
+
                 default:
-                    
+
                     $this->_filter = array();
                     $this->_filter['field'] = $field;
 
                     /**
                      * Check the parameter's value, if empty break
-                     */                    
+                     */
                     if (!$this->_hasFieldParams()) {
                         break;
                     }
@@ -719,14 +723,14 @@ class FilterComponent extends Component {
                      */
                     switch (mb_strtolower($this->_filter['operator'], 'utf-8')) {
                         case 'between':
-                            $condition[] = $this->_conditionsForOperatorBetween();    
+                            $condition += $this->_conditionsForOperatorBetween();
                             break;
-                        
+
                         default:
-                            $condition[] = ($this->_isMayExplodeValue())
+                            $condition += ($this->_isMayExplodeValue())
                                          ? $this->_getFieldConcatenateValue()
                                          : $this->_getFieldValue();
-                            
+
                             /**
                              * Set form field value
                             */
@@ -741,7 +745,7 @@ class FilterComponent extends Component {
 
 /**
  * Verify params of field
- * 
+ *
  * @param string $more
  * @param boolean $between
  * @return boolean
@@ -749,7 +753,7 @@ class FilterComponent extends Component {
  * @since 2.0
  */
 protected function _hasFieldParams($more = null, $between = false) {
-    
+
     if ($between) {
         return isset($this->_params[sprintf('%s.%s-between', $this->getOption('label', 'prefix'), $this->_filter['field'])]);
     }
@@ -764,7 +768,7 @@ protected function _hasFieldParams($more = null, $between = false) {
 
 /**
  * Return params of field
- * 
+ *
  * @param string $more
  * @param boolean $between
  * @return array
@@ -772,11 +776,11 @@ protected function _hasFieldParams($more = null, $between = false) {
  * @since 2.0
  */
 protected function _getFieldParams($more = null, $between = false) {
-    
+
     if (!$this->_hasFieldParams($more, $between)) {
         return '';
     }
-    
+
     if ($between) {
         return $this->_params[sprintf('%s.%s-between', $this->getOption('label', 'prefix'), $this->_filter['field'])];
     }
@@ -807,7 +811,7 @@ protected function _getFieldParams($more = null, $between = false) {
         if (!$this->_hasFieldParams('fieldModel')) {
             return array();
         }
-        
+
         /**
          * Define defaults
          */
@@ -829,13 +833,13 @@ protected function _getFieldParams($more = null, $between = false) {
                 $this->_filter['value.before'] = '%';
                 $this->_filter['value.after']  = '%';
                 break;
-            
+
             case 'likebegin':
             case 'like begin':
                 $operator = 'LIKE';
                 $this->_filter['value.after'] = '%';
                 break;
-            
+
             case 'likeend':
             case 'like end':
                 $operator = 'LIKE';
@@ -847,24 +851,24 @@ protected function _getFieldParams($more = null, $between = false) {
                 $this->_filter['value.after']  = '';
                 break;
         }
-        
+
         $condition[] = ($this->_isMayExplodeValue())
                      ? $this->_getFieldConcatenateValue()
                      : $this->_getFieldValue();
-        
+
         /**
          * Set form field value
          */
         $this->controller->request->data[$this->getOption('label', 'prefix')][$this->_filter['field']] = $this->_getFieldParams();
         $this->controller->request->data[$this->getOption('label', 'prefix')][$this->getOption('label', 'fieldModel')][$field] = $this->_getFieldParams('fieldModel');
         $this->controller->request->data[$this->getOption('label', 'prefix')][$this->getOption('label', 'operator')][$field]   = $this->_getFieldParams('operator');
-        
+
         return $condition;
     }
 
 /**
  * Make the condition when operator='between'
- * 
+ *
  * @return array
  * @access protected
  */
@@ -876,10 +880,10 @@ protected function _getFieldParams($more = null, $between = false) {
 
         /**
          * Verifica a existencia dos dois parâmetros
-         */ 
+         */
         if (!$this->_hasFieldParams() || !$this->_hasFieldParams(null, true))
         {
-                                
+
             if ($this->_hasFieldParams()) {
                 $$this->controller->request->data[$this->getOption('label', 'prefix')][$this->_filter['field']] = $this->_getFieldParams();
             }
@@ -892,9 +896,9 @@ protected function _getFieldParams($more = null, $between = false) {
         }
 
         $this->_filter['value-between'] = $this->_getFieldParams(null, true);
-        
 
-        /** 
+
+        /**
          * Altera o formato da data para formato de banco
          */
         if (isset($this->_filter['between']['date'])) {
@@ -903,12 +907,12 @@ protected function _getFieldParams($more = null, $between = false) {
                 $this->_filter['value-between'] = implode(preg_match("~\/~", $this->_filter['value-between']) == 0 ? "/" : "-", array_reverse(explode(preg_match("~\/~", $this->_filter['value-between']) == 0 ? "-" : "/", $this->_filter['value-between'])));
             }
         }
-                            
+
         $this->_filter['value']    = array($this->_filter['value'], $this->_filter['value-between']);
         $this->_filter['operator'] = 'BETWEEN ? AND ?';
-        
+
         $condition = array(sprintf('%s %s', $this->_filter['fieldModel'], $this->_filter['operator']) => $this->_filter['value']);
-        
+
         $this->controller->request->data[$this->getOption('label', 'prefix')][$this->_filter['field']]            = $this->_getFieldParams();
         $this->controller->request->data[$this->getOption('label', 'prefix')][$this->_filter['field'].'-between'] = $this->_getFieldParams(null, true);
 
@@ -917,7 +921,7 @@ protected function _getFieldParams($more = null, $between = false) {
 
 /**
  * Return the default value of the specified option
- * 
+ *
  * @param string $option
  * @return string
  * @access protected
@@ -929,7 +933,7 @@ protected function _getFieldParams($more = null, $between = false) {
             if (is_array($this->_filter['value'])) {
                 if (isset($this->_filter['value'][$option])) {
                     $default = $this->_filter['value'][$option];
-                } 
+                }
             }
         }
         if ($default == null) {
@@ -938,7 +942,7 @@ protected function _getFieldParams($more = null, $between = false) {
                 case 'not like':
                     $default = '%';
                     break;
-                
+
                 default:
                     $default = '';
                     break;
@@ -955,7 +959,7 @@ protected function _getFieldParams($more = null, $between = false) {
 
 /**
  * Verify the permission to explode value
- * 
+ *
  * @return boolean
  * @access protected
  * @since 2.0
@@ -983,7 +987,7 @@ protected function _getFieldParams($more = null, $between = false) {
 
 /**
  * Composite value of condition
- * 
+ *
  * @return array
  * @access protected
  * @since 2.0
@@ -1006,7 +1010,7 @@ protected function _getFieldParams($more = null, $between = false) {
 
 /**
  * Explode and concatenate the values
- * 
+ *
  * @return array
  * @access protected
  * @since 2.0
@@ -1032,7 +1036,7 @@ protected function _getFieldParams($more = null, $between = false) {
     protected function _valueConcatenate() {
         return $this->_getFieldConcatenateValue();
     }
-    
+
 /**
  * Get the fields of model automaticaly
  *
@@ -1053,7 +1057,7 @@ protected function _getFieldParams($more = null, $between = false) {
 
 /**
  * getFieldOperator
- * 
+ *
  * @param string $fieldName
  * @return string
  * @access public
@@ -1073,7 +1077,7 @@ protected function _getFieldParams($more = null, $between = false) {
 
 /**
  * Define paginator's options for CakePHP2.2+
- * 
+ *
  * @param mixed $option
  * @param mixed $value
  * @access public
