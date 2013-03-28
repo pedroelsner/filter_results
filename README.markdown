@@ -11,7 +11,7 @@ Compatible with CakePHP 2.3 + Paginate (Component)
 # Changes to version 2.3
 
 * `FilterResultsComponent` was changed to `FilterComponent`;
-* `SearchHelper` was changed to `SearchHelper`;
+* `FilterFormHelper` was changed to `SearchHelper`;
 * Refectory all struture methods;
 
 # Installation
