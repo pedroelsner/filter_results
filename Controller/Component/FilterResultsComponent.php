@@ -9,10 +9,8 @@
  * @copyright  Copyright 2012, Pedro Elsner (http://pedroelsner.com/)
  * @author     Pedro Elsner <pedro.elsner@gmail.com>
  * @license    Creative Commons 3.0 (http://creativecommons.org/licenses/by/3.0/)
- * @version    2.1
+ * @version    2.0
  */
-
-App::uses('SessionComponent', 'Controller/Component');
 
 /**
  * Application component class for return conditions array to cake model.
@@ -20,31 +18,11 @@ App::uses('SessionComponent', 'Controller/Component');
  *
  * @use        Component
  * @package    filter_results
- * @subpackage filter_results.filter
- * @link       http://www.github.com/pedroelsner/filter_results/tree/2.1/Controller/Component/FilterComponent.php
+ * @subpackage filter_results.filter_results
+ * @link       http://www.github.com/pedroelsner/filter_results/tree/2.0/Controller/Component/FilterResultsComponent.php
  */
-
-class FilterComponent extends Component {
-
-/**
- * Name of component
- * NEVER CHANGE IT
- *
- * @var string
- * @access private
- * @since 2.1
- */
-    private $_name = 'Filter';
-
-/**
- * The instance number of component
- *
- * @var int
- * @access private
- * @since 1.0
- */
-    private $_instance;
-
+class FilterResultsComponent extends Component {
+    
 /**
  * Control the number of instances
  *
@@ -63,7 +41,16 @@ class FilterComponent extends Component {
  * @since 2.0
  */
     protected $_filter = array();
-
+    
+/**
+ * The instance number of component
+ *
+ * @var int
+ * @access private
+ * @since 1.0
+ */
+    private $_instance;
+    
 /**
  * Default settings
  *
@@ -83,7 +70,7 @@ class FilterComponent extends Component {
         'label' => array(
             'prefix'     => 'filter',
             'fieldModel' => 'field',
-            'operator'   => 'operator',
+            'operator'   => 'operatior',
         ),
         'form' => array(
             'id' => 'form-filter-results',
@@ -100,7 +87,7 @@ class FilterComponent extends Component {
     protected $_controller;
 
 /**
- * Save conditions
+ * Save results of $this->make()
  *
  * @var array
  * @access protected
@@ -115,8 +102,8 @@ class FilterComponent extends Component {
  * @access protected
  * @since 1.0
  */
-    protected $_params = array();
-
+    protected $_params = array(); 
+   
 /**
  * Construct
  *
@@ -124,12 +111,8 @@ class FilterComponent extends Component {
  * @since 1.0
  */
     public function __construct(ComponentCollection $collection, $settings = array()) {
-        $this->_options = array_merge($this->_options, $settings);
-
         $this->_instance = ++self::$instances;
-        if ($this->_instance > 1) {
-            $this->_name = sprintf('%s%d', $this->_name, $this->_instance);
-        }
+        $this->_options = array_merge($this->_options, $settings);
     }
 
 /**
@@ -141,13 +124,7 @@ class FilterComponent extends Component {
     public function __clone() {
         $this->_instance = ++self::$instances;
         $this->_options['label']['prefix'] .= sprintf('_%s', $this->_instance);
-        $this->_name = sprintf('%s%d', $this->_name, $this->_instance);
-
-        /**
-         * Sent component to view (i don't like it, but we need)
-         */
-        $this->controller->set($this->_name, $this);
-    }
+    }   
 
 /**
  * Executed before the Controller::beforeFiler()
@@ -158,14 +135,9 @@ class FilterComponent extends Component {
  */
     public function initialize(Controller $controller) {
         $this->controller = $controller;
-
-        /**
-         * Sent component to view (i don't like it, but we need)
-         */
-        $this->controller->set($this->_name, $this);
     }
-
-/**
+    
+/** 
  * Executed after the Controller::beforeFiler(), but before execute the requested action
  *
  * @param object $controller
@@ -177,39 +149,38 @@ class FilterComponent extends Component {
     }
 
 /**
- * Executed before the Controller::beforeRender()
+ * Executed before the Controller:beforeRender()
  *
  * @param object $controller
  * @access public
  * @since 1.0
  */
     public function beforeRender(Controller $controller) {
-
     }
 
 /**
- * Executed before the Controller::render()
+ * Executed before the Controller:render()
  *
  * @param object $controller
  * @access public
  * @since 1.0
  */
     public function shutdown(Controller $controller) {
-
+        
     }
 
 /**
- * Executed before the Controller::redirect()
+ * Executed before the Controller:redirect()
  *
- * @param object $controller
- * @param array $url
- * @param string $status
+ * @param object  $controller
+ * @param array   $url
+ * @param string  $status
  * @param boolean $exit
  * @access public
  * @since 1.0
  */
     public function beforeRedirect(Controller $controller, $url, $status = null, $exit = true) {
-
+        
     }
 
 /**
@@ -227,10 +198,10 @@ class FilterComponent extends Component {
 /**
  * Decrypty the string sent
  *
- * @param string $string
+ * @param  string $string
  * @return string
  * @access protected
- * @since 1.0
+ * @since  1.0
  */
     protected function _decrypt($string) {
         return (!is_string($string)) ? '' : base64_decode(base64_decode($string));
@@ -240,20 +211,18 @@ class FilterComponent extends Component {
  * Give the requested setting
  *
  * @param string $key
- * @param mixed $option
+ * @param mixed  $option
  * @return mixed
  * @access public
  * @since 2.0
  */
     public function getOption($key, $option = null) {
+
         if (is_null($option)) {
-            return (isset($this->_options[$key]))
-                 ? $this->_options[$key]
-                 : '';
+            return (isset($this->_options[$key])) ? $this->_options[$key] : '';
         }
-        return (isset($this->_options[$key][$option]))
-             ? $this->_options[$key][$option]
-             : '';
+
+        return (isset($this->_options[$key][$option])) ? $this->_options[$key][$option] : '';
     }
 
 /**
@@ -267,87 +236,48 @@ class FilterComponent extends Component {
  * @since 2.0
  */
     public function setOption($key, $option, $value) {
+
         switch ($key) {
             case 'filters':
                 return false;
                 break;
+
             case 'auto':
             case 'explode':
             case 'label':
                 $this->_options[$key][$option] = $value;
                 return true;
                 break;
+            
             default:
                 return false;
                 break;
         }
+
     }
 
 /**
- * Return conditions
+ * Return conditions created by the function $this->make()
  *
  * @return array
  * @access public
  * @since 1.0
  */
     public function getConditions() {
+
         if (!is_array($this->_conditions)) {
-            return $this->_getConditions();
+            return $this->make();
         }
+
         if (count($this->_conditions) == 0) {
-            return $this->_getConditions();
+            return $this->make();
         }
+
         return $this->_conditions;
-    }
-/**
- * @deprecated
- */
-    public function make() {
-        return $this->getConditions();
-    }
+    }   
 
 /**
- * Do everiting to create all conditions
- *
- * @return array
- * @access protected
- * @since 2.1
- */
-    protected function _getConditions() {
-
-        /**
-         * If have a POST DATA SUBMITED
-         */
-        if (isset($this->controller->request->data[$this->getOption('label', 'prefix')])) {
-            $this->_redirectToNamedUrl();
-            return;
-        }
-
-        /**
-         * If don't have named params, exit
-         */
-        if (count($this->controller->request->params['named']) == 0) {
-            return array();
-        }
-
-        /**
-         * If all variables is OK, make conditions
-         */
-        if ($this->_checkParamsNamed() > 0) {
-            $this->_conditions = $this->_makeAllConditions($this->_options['filters']);
-            if ($this->getOption('auto', 'paginate')) {
-                $paginator = $this->controller->Paginator;
-                if (!isset($paginator['conditions'])) {
-                    $paginator['conditions'] = array();
-                }
-                $paginator['conditions'] = Hash::merge($paginator['conditions'], $this->_conditions);
-            }
-            return $this->_conditions;
-        }
-    }
-
-/**
- * Return if has the searched field
+ * HasField
  *
  * @param string $field
  * @return boolean
@@ -355,90 +285,65 @@ class FilterComponent extends Component {
  * @since 1.0
  */
     public function hasField($field) {
-        return $this->_hasField($field, $this->getOption('filters'));
+        return $this->_searchField($field, $this->getOption('filters'));
     }
 
 /**
- * Return if has the searched field
- *
- * @param string $field
- * @param type $filters
+ * Search the specified field
+ * 
+ * @param string $field  
+ * @param type   $filters
  * @return boolean
  * @access protected
  * @since 2.0
  */
-    protected function _hasField($field, $filters) {
+    protected function _searchField($field, $filters) {
+
         $hasField = false;
+
         foreach($filters as $key => $value) {
-            switch (mb_strtolower($key, 'utf-8')) {
+
+            switch (mb_strtolower($key)) {
                 case 'not':
                 case 'and':
                 case 'or':
-                    $hasField = $this->_hasField($field, $value);
+                    $hasField = $this->_searchField($field, $value);
                     break;
+
                 default:
                     if (is_string($value)) {
                        if ($value == $field) {
                             $hasField = true;
                         }
                     }
+                    
                     if ($key == $field) {
                         $hasField = true;
                     }
             }
         }
+
         return $hasField;
     }
 
 /**
- * Return array select options of the specified field
+ * Return array select of the specified field
  *
  * @param string $field
  * @return mixed
  * @access public
  * @since 1.0
  */
-    public function getFieldSelectOptions($field) {
-        $values = array();
-        if ($this->hasField($field)) {
-            $options = $this->_getFieldOptions($field, $this->getOption('filters'));
-            $values += $this->_searchFieldValuesSelectOption($options);
-        }
-        return (count($values) == 0) ? null : $values;
-    }
-/**
- * @deprecated
- */
     public function getFieldSelect($field) {
-        return $this->getFieldSelectOptions($field);
-    }
-
-/**
- * Return options field
- *
- * @param string $field
- * @param type   $filters
- * @return array
- * @access protected
- * @since 2.0
- */
-    protected function _getFieldOptions($field, $filters) {
-        $return = array();
-        foreach($filters as $key => $value) {
-            switch (mb_strtolower($key)) {
-                case 'not':
-                case 'and':
-                case 'or':
-                    $return = $this->_getFieldOptions($field, $value);
-                    break;
-
-                default:
-                   if ($key == $field) {
-                        $return = $value;
-                   }
-            }
+        
+        $values = array();
+        
+        if ($this->hasField($field)) {
+            $options = $this->_getFilterOptions($field, $this->getOption('filters'));
+            $values += $this->_searchSelectOption($options);
         }
-        return $return;
+        
+        return (count($values) == 0) ? null : $values;
     }
 
 /**
@@ -449,11 +354,14 @@ class FilterComponent extends Component {
  * @access public
  * @since 2.0
  */
-    public function _searchFieldValuesSelectOption($options) {
+    public function _searchSelectOption($options) {
+
         if (!is_array($options)) {
             return array();
         }
+
         $result = array();
+        
         foreach ($options as $key => $value) {
             if (isset($options[$key]['select'])) {
                 if (is_array($options[$key]['select'])) {
@@ -461,12 +369,13 @@ class FilterComponent extends Component {
                 }
             } else {
                 if (is_array($value)) {
-                    $result += $this->_searchFieldValuesSelectOption($value);
+                    $result += $this->_searchSelectOption($value);
                 }
             }
         }
+        
         return $result;
-    }
+    }   
 
 /**
  * Composite array values for selection in the form
@@ -480,16 +389,16 @@ class FilterComponent extends Component {
         return array('' => $label) + $values;
     }
 /**
- * @deprecated
+ * @deprecated 08-04-2012
  */
     public function values($label, $values) {
-        return $this->select($label, $values);
+        return $this->values($label, $values);
     }
 /**
- * @deprecated
+ * @deprecated 07-04-2012
  */
     public function merge($label, $values) {
-        return $this->select($label, $values);
+        return $this->values($label, $values);
     }
 
 /**
@@ -509,7 +418,7 @@ class FilterComponent extends Component {
 
             $filters = array($filters);
         }
-
+        
         if ($this->getOption('filters')) {
             $this->_options['filters'] += $filters;
         } else {
@@ -518,11 +427,52 @@ class FilterComponent extends Component {
     }
 
 /**
+ * Main method
+ * Do everiting to create conditions
+ *
+ * @return array 
+ * @access public
+ * @since 1.0
+ */
+    public function make() {
+        
+        if (isset($this->controller->request->data[$this->getOption('label', 'prefix')])) {
+            $this->_redirectToNamedUrl();
+            return;
+        }
+        
+        
+        /**
+         * Sent component to view
+         */
+        $name = 'FilterResults';
+        if ($this->_instance > 1) {
+            $name = $name . $this->_instance;
+        }
+        $this->controller->set($name, $this);
+        
+        if (count($this->controller->request->params['named']) == 0) {
+            return array();
+        }
+        
+        if ($this->_check() > 0) {
+            
+            $this->_conditions = $this->_filterFields($this->_options['filters']);
+
+            if ($this->getOption('auto', 'paginate')) {
+                $this->controller->Paginator->paginate['conditions'][] = $this->_conditions;
+            }
+            return $this->_conditions;
+        }
+        
+    }
+
+/**
  * Make the URL with NAMED fields.
  * Like this: example.com/cake/posts/index/Search.keywords:mykeyword/Search.tag_id:3
- *
+ * 
  * After, autoredirect to created URL
- *
+ * 
  * @param array $url
  * @param array $get
  * @access protected
@@ -535,10 +485,13 @@ class FilterComponent extends Component {
                 $get += array($key => $value);
             }
         }
+        
         if (count($get) > 0) {
             $url['?'] = $get;
         }
+
         foreach ($this->controller->request->data[$this->getOption('label', 'prefix')] as $key => $value) {
+
             if (!is_array($value)) {
                 $url[$this->_encrypt(sprintf('%s.%s', $this->getOption('label', 'prefix'), $key))] = $this->_encrypt($value);
             } else {
@@ -547,49 +500,46 @@ class FilterComponent extends Component {
                 }
             }
         }
+        
 
-        /**
-         * Remove filters of NAMED
-         */
+        // Remove filters of NAMED
         $named = $this->controller->request->params['named'];
         foreach ($named as $key => $value) {
             if (!(strpos($this->_decrypt($key), sprintf('%s.', $this->getOption('label', 'prefix'))) === false)) {
                 unset($named[$key]);
             }
         }
-
-        /**
-         * Remove 'page' param
-         */
+        // Remove 'page' param
         foreach ($named as $key => $value) {
             if ($key == 'page') {
                 unset($named[$key]);
             }
         }
 
-        /**
-         * Keep application's NAMED params on redirect,
-         * and redirect
-         */
+        // Keep application's NAMED params on redirect
         $url = array_merge($this->controller->request->params['pass'], $named, $url);
+
         $this->controller->redirect($url, null, true);
     }
 
+
+        
 /**
  * Check if the URL contain some NAMED parameter.
- * If found then encrypt, store it and return count of NAMED parameters.
+ * If found then encrypt and store it.
+ * Return count of NAMED parameters.
  *
  * @return int
  * @access protected
  * @since 1.0
  */
-    protected function _checkParamsNamed() {
-
+    protected function _check() {
+        
         // Decrypt all NAMED parameters
         foreach ($this->controller->request->params['named'] as $key => $value) {
             $this->_params[$this->_decrypt($key)] = $this->_decrypt($value);
         }
-
+        
         $count = 0;
         foreach ($this->_params as $key => $value) {
             if (strpos($key,$this->getOption('label', 'prefix')) > -1) {
@@ -598,16 +548,9 @@ class FilterComponent extends Component {
         }
         return $count;
     }
-/**
- * @deprecated
- */
-    protected function _check() {
-        return $this->_checkParamsNamed();
-    }
-
 
 /**
- * Make all conditions by every filter fields
+ * FilterFields
  *
  * @param array $filters
  * @param array $condition
@@ -615,31 +558,36 @@ class FilterComponent extends Component {
  * @access protected
  * @since 1.0
  */
-    protected function _makeAllConditions($filters, $condition = array()) {
+    protected function _filterFields($filters, $condition = array()) {
+
         foreach ($filters as $key => $value) {
+
             switch (mb_strtolower($key, 'utf-8')) {
                 case 'not':
                 case 'and':
                 case 'or':
-                    $conditionOfFilter = $this->_makeAllConditions($value);
+                    
+                    $conditionOfFilter = $this->_filterFields($value);
                     if (count($conditionOfFilter) > 0) {
                         if (!isset($condition[$key])) {
-                            $condition[$key] = $this->_makeAllConditions($value);
+                            $condition[$key] = $this->_filterFields($value);
                         } else {
-                            $condition[$key] += $this->_makeAllConditions($value);
-                        }
+                            $condition[$key] += $this->_filterFields($value);
+                        }    
                     }
                     break;
-
+                
                 default:
                     $condition += (is_array($value))
                          ? $this->_makeConditions($key, $value)
                          : $this->_makeConditions($value);
                     break;
             }
+
         }
+        
         return $condition;
-    }
+    }    
 
 /**
  * Make conditions for the specified field sent
@@ -651,13 +599,14 @@ class FilterComponent extends Component {
  * @since 1.0
  */
     protected function _makeConditions($field, $options = null, $condition = array()) {
-
+        
         if (!isset($options)) {
             return $this->_makeConditionsWithoutOptions($field);
         }
-
+        
         foreach ($options as $key => $value) {
-            switch (mb_strtolower($key, 'utf-8')) {
+
+            switch (strtolower($key)) {
                 case 'not':
                 case 'and':
                 case 'or':
@@ -665,18 +614,19 @@ class FilterComponent extends Component {
                         $key => $this->_makeConditions($field, $value)
                     );
                     break;
-
+                
                 default:
-
+                    
                     $this->_filter = array();
                     $this->_filter['field'] = $field;
 
                     /**
                      * Check the parameter's value, if empty break
-                     */
+                     */                    
                     if (!$this->_hasFieldParams()) {
                         break;
                     }
+
 
                     /**
                      * Define defaults
@@ -687,11 +637,14 @@ class FilterComponent extends Component {
                     } else {
                         $this->_filter['fieldModel'] = (is_array($value)) ? $key : $value;
                     }
+
                     if (!isset($this->_filter['operator'])) {
                         $this->_filter['operator'] = '=';
                     }
-                    $this->_filter['value.before'] = $this->_getFieldDefaultValueOptions('before');
-                    $this->_filter['value.after']  = $this->_getFieldDefaultValueOptions('after');
+
+                    $this->_filter['value.before'] = $this->_defaultOptionsValue('before');
+                    $this->_filter['value.after']  = $this->_defaultOptionsValue('after');
+
                     if (!isset($this->_filter['value'])) {
                         $this->_filter['value'] = $this->_getFieldParams();
                     } else {
@@ -700,15 +653,20 @@ class FilterComponent extends Component {
                             $this->_filter['value'] = $this->_getFieldParams();
                         }
                     }
-                    if (empty($this->_filter['value']) && $this->_filter['value'] !== '0') {
+                    
+                    if (empty($this->_filter['value'])) {
                         break;
                     }
+                    
                     $this->_filter['explode.concatenate'] = (isset($this->_filter['explode']['concatenate']))
                                                           ? $this->_filter['explode']['concatenate']
                                                           : $this->getOption('explode', 'concatenate');
+
                     $this->_filter['explode.character'] = (isset($this->_filter['explode']['character']))
                                                           ? $this->_filter['explode']['character']
                                                           : $this->getOption('explode', 'character');
+
+
                     if (!isset($this->_filter['explode'])) {
                         $this->_filter['explode'] = null;
                     } else {
@@ -717,43 +675,30 @@ class FilterComponent extends Component {
                         }
                     }
 
-
-                    /**
-                     * Define operator
-                     */
                     switch (mb_strtolower($this->_filter['operator'], 'utf-8')) {
                         case 'between':
-                            $condition += $this->_conditionsForOperatorBetween();
+                            $condition += $this->_conditionsForOperatorBetween();    
                             break;
-
+                        
                         default:
-                            $condition += ($this->_isMayExplodeValue())
-                                         ? $this->_getFieldConcatenateValue()
-                                         : $this->_getFieldValue();
 
-                            /**
-                             * Set form field value
-                            */
+                            $condition += $this->_isMayExplodeValue()
+                                        ? $this->_valueConcatenate()
+                                        : $this->_value();
+                            
                             $this->controller->request->data[$this->getOption('label', 'prefix')][$this->_filter['field']] = $this->_getFieldParams();
                             break;
                     }
+
             }
-            // do foreach
         }
+        
         return $condition;
     }
 
-/**
- * Verify params of field
- *
- * @param string $more
- * @param boolean $between
- * @return boolean
- * @access protected
- * @since 2.0
- */
-protected function _hasFieldParams($more = null, $between = false) {
 
+protected function _hasFieldParams($more = null, $between = false) {
+    
     if ($between) {
         return isset($this->_params[sprintf('%s.%s-between', $this->getOption('label', 'prefix'), $this->_filter['field'])]);
     }
@@ -765,22 +710,12 @@ protected function _hasFieldParams($more = null, $between = false) {
     }
 }
 
-
-/**
- * Return params of field
- *
- * @param string $more
- * @param boolean $between
- * @return array
- * @access protected
- * @since 2.0
- */
 protected function _getFieldParams($more = null, $between = false) {
-
+    
     if (!$this->_hasFieldParams($more, $between)) {
         return '';
     }
-
+    
     if ($between) {
         return $this->_params[sprintf('%s.%s-between', $this->getOption('label', 'prefix'), $this->_filter['field'])];
     }
@@ -808,38 +743,38 @@ protected function _getFieldParams($more = null, $between = false) {
         if (!$this->_hasFieldParams()) {
             return array();
         }
+        
         if (!$this->_hasFieldParams('fieldModel')) {
             return array();
         }
+        
 
         /**
          * Define defaults
          */
         $this->_filter['fieldModel'] = $this->_getFieldParams('fieldModel');
         $this->_filter['value']      = $this->_getFieldParams();
-        $this->_filter['operator'] = ($this->_hasFieldParams('operator'))
-                                   ? $this->_getFieldParams('operator')
-                                   : 'like';
+
+        $this->_filter['operator'] = ($this->_hasFieldParams('operator')) ? $this->_getFieldParams('operator') : 'like';
+
         $this->_filter['explode'] = true;
         $this->_filter['explode.concatenate'] = $this->getOption('explode', 'concatenate');
         $this->_filter['explode.character']   = $this->getOption('explode', 'character');
 
-        /**
-         * Define operator
-         */
+
         switch(mb_strtolower($this->_filter['operator'], 'utf-8')) {
             case 'like':
             case 'not like':
                 $this->_filter['value.before'] = '%';
                 $this->_filter['value.after']  = '%';
                 break;
-
+            
             case 'likebegin':
             case 'like begin':
                 $operator = 'LIKE';
                 $this->_filter['value.after'] = '%';
                 break;
-
+            
             case 'likeend':
             case 'like end':
                 $operator = 'LIKE';
@@ -851,24 +786,23 @@ protected function _getFieldParams($more = null, $between = false) {
                 $this->_filter['value.after']  = '';
                 break;
         }
+        
 
-        $condition[] = ($this->_isMayExplodeValue())
-                     ? $this->_getFieldConcatenateValue()
-                     : $this->_getFieldValue();
-
-        /**
-         * Set form field value
-         */
+        $condition = $this->_isMayExplodeValue()
+                   ? $this->_valueConcatenate()
+                   : $this->_value();
+        
         $this->controller->request->data[$this->getOption('label', 'prefix')][$this->_filter['field']] = $this->_getFieldParams();
+
         $this->controller->request->data[$this->getOption('label', 'prefix')][$this->getOption('label', 'fieldModel')][$field] = $this->_getFieldParams('fieldModel');
         $this->controller->request->data[$this->getOption('label', 'prefix')][$this->getOption('label', 'operator')][$field]   = $this->_getFieldParams('operator');
-
+        
         return $condition;
     }
 
 /**
  * Make the condition when operator='between'
- *
+ * 
  * @return array
  * @access protected
  */
@@ -880,10 +814,10 @@ protected function _getFieldParams($more = null, $between = false) {
 
         /**
          * Verifica a existencia dos dois parâmetros
-         */
+         */ 
         if (!$this->_hasFieldParams() || !$this->_hasFieldParams(null, true))
         {
-
+                                
             if ($this->_hasFieldParams()) {
                 $$this->controller->request->data[$this->getOption('label', 'prefix')][$this->_filter['field']] = $this->_getFieldParams();
             }
@@ -896,9 +830,9 @@ protected function _getFieldParams($more = null, $between = false) {
         }
 
         $this->_filter['value-between'] = $this->_getFieldParams(null, true);
+        
 
-
-        /**
+        /** 
          * Altera o formato da data para formato de banco
          */
         if (isset($this->_filter['between']['date'])) {
@@ -907,12 +841,12 @@ protected function _getFieldParams($more = null, $between = false) {
                 $this->_filter['value-between'] = implode(preg_match("~\/~", $this->_filter['value-between']) == 0 ? "/" : "-", array_reverse(explode(preg_match("~\/~", $this->_filter['value-between']) == 0 ? "-" : "/", $this->_filter['value-between'])));
             }
         }
-
+                            
         $this->_filter['value']    = array($this->_filter['value'], $this->_filter['value-between']);
         $this->_filter['operator'] = 'BETWEEN ? AND ?';
-
+        
         $condition = array(sprintf('%s %s', $this->_filter['fieldModel'], $this->_filter['operator']) => $this->_filter['value']);
-
+        
         $this->controller->request->data[$this->getOption('label', 'prefix')][$this->_filter['field']]            = $this->_getFieldParams();
         $this->controller->request->data[$this->getOption('label', 'prefix')][$this->_filter['field'].'-between'] = $this->_getFieldParams(null, true);
 
@@ -921,54 +855,56 @@ protected function _getFieldParams($more = null, $between = false) {
 
 /**
  * Return the default value of the specified option
- *
+ * 
  * @param string $option
  * @return string
  * @access protected
  * @since 2.0
  */
-    protected function _getFieldDefaultValueOptions($option) {
+    protected function _defaultOptionsValue($option) {
+
         $default = null;
+
         if (isset($this->_filter['value'])) {
             if (is_array($this->_filter['value'])) {
                 if (isset($this->_filter['value'][$option])) {
                     $default = $this->_filter['value'][$option];
-                }
+                } 
             }
         }
+
+
         if ($default == null) {
             switch (mb_strtolower($this->_filter['operator'], 'utf-8')) {
                 case 'like':
                 case 'not like':
                     $default = '%';
                     break;
-
+                
                 default:
                     $default = '';
                     break;
             }
         }
+
         return $default;
-    }
-/**
- * @deprecated
- */
-    protected function _defaultOptionsValue($option) {
-        return $this->_getFieldDefaultValueOptions($option);
     }
 
 /**
  * Verify the permission to explode value
- *
+ * 
  * @return boolean
  * @access protected
  * @since 2.0
  */
     protected function _isMayExplodeValue() {
+
         if (count($this->_filter) == 0) {
             return false;
         }
+
         if (is_null($this->_filter['explode'])) {
+
             switch (mb_strtolower($this->_filter['operator'], 'utf-8')) {
                 case 'like':
                 case 'not like':
@@ -979,64 +915,61 @@ protected function _getFieldParams($more = null, $between = false) {
                     break;
             }
         }
+
         if ($this->_filter['explode']) {
             return true;
         }
+
         return false;
     }
 
 /**
  * Composite value of condition
- *
+ * 
  * @return array
  * @access protected
  * @since 2.0
  */
-    protected function _getFieldValue() {
+    protected function _value() {
+
         if (count($this->_filter) == 0) {
             return array();
         }
+
         return array(
             sprintf('%s %s', $this->_filter['fieldModel'], $this->_filter['operator']) =>
             sprintf('%s%s%s', $this->_filter['value.before'], $this->_filter['value'], $this->_filter['value.after'])
         );
     }
-/**
- * @deprecated
- */
-    protected function _value() {
-        return $this->_getFieldValue();
-    }
 
 /**
  * Explode and concatenate the values
- *
+ * 
  * @return array
  * @access protected
  * @since 2.0
  */
-    protected function _getFieldConcatenateValue() {
+    protected function _valueConcatenate() {
+
         $condition = array();
         $values = explode($this->_filter['explode.character'], $this->_filter['value']);
+
         if (count($values) > 1) {
+
             foreach ($values as $k => $v) {
                 $condition[$this->_filter['explode.concatenate']][$k] = array(
-                    sprintf('%s %s' , $this->_filter['fieldModel'], $this->_filter['operator']) =>
+                    sprintf('%s %s', $this->_filter['fieldModel'], $this->_filter['operator']) =>
                     sprintf('%s%s%s', $this->_filter['value.before'], $v, $this->_filter['value.after'])
                 );
             }
+
         } else {
-            $condition = $this->_getFieldValue();
+            $condition = $this->_value();
         }
+
         return $condition;
     }
-/**
- * @deprecated
- */
-    protected function _valueConcatenate() {
-        return $this->_getFieldConcatenateValue();
-    }
-
+    
 /**
  * Get the fields of model automaticaly
  *
@@ -1045,9 +978,11 @@ protected function _getFieldParams($more = null, $between = false) {
  * @since 1.0
  */
     public function getModelFields() {
+
         if (!isset($this->controller->uses[0])) {
             return array();
         }
+        
         $fields = array();
         foreach($this->controller->{$this->controller->uses[0]}->_schema as $key => $value) {
             $fields[sprintf('%s.%s', $this->controller->uses[0], $key)] = $key;
@@ -1057,14 +992,16 @@ protected function _getFieldParams($more = null, $between = false) {
 
 /**
  * getFieldOperator
- *
+ * 
  * @param string $fieldName
  * @return string
  * @access public
  * @since 1.1
  */
     public function getFieldOperator($fieldName) {
-        $options = $this->_getFieldOptions($fieldName, $this->getOption('filters'));
+
+        $options = $this->_getFilterOptions($fieldName, $this->getOption('filters'));
+        
         if (is_array($options)) {
             foreach ($options as $key => $value) {
                 if (isset($value['operator'])) {
@@ -1072,28 +1009,57 @@ protected function _getFieldParams($more = null, $between = false) {
                 }
             }
         }
+
         return '';
     }
 
 /**
+ * Search Filter Options
+ * 
+ * Retorna as opções do filtro
+ * 
+ * @param string $field  
+ * @param type   $filters
+ * @return array
+ * @access protected
+ * @since 2.0
+ */
+    protected function _getFilterOptions($field, $filters) {
+
+        $return = array();
+
+        foreach($filters as $key => $value) {
+
+            switch (mb_strtolower($key)) {
+                case 'not':
+                case 'and':
+                case 'or':
+                    $return = $this->_getFilterOptions($field, $value);
+                    break;
+                
+                default:
+                   if ($key == $field) {
+                        $return = $value;
+                   }
+            }
+        }
+
+        return $return;
+    }
+
+/**
  * Define paginator's options for CakePHP2.2+
- *
+ * 
  * @param mixed $option
  * @param mixed $value
  * @access public
  * @since 2.0
  */
     public function setPaginate($option, $value = null) {
-        $setting = (is_array($option))
-                 ? $option
-                 : array($option => $value);
-        if (!(is_array($setting))) {
-            return;
-        }
-        $this->controller->paginate = array_merge(
-            $this->controller->paginate,
-            $setting
-        );
-    }
+        $setting = (is_array($option)) ? $option : array($option => $value);
+        if (!(is_array($setting))) return;
 
+        $this->controller->paginate = array_merge($this->controller->paginate, $setting);
+    }
+    
 }
