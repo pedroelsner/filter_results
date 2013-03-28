@@ -8,7 +8,7 @@ Compatible with CakePHP 2.3 + Paginate (Component)
 * Version for CakePHP 1.3: [http://github.com/pedroelsner/filter_results/tree/1.3](http://github.com/pedroelsner/filter_results/tree/1.3 "FilterResults para CakePHP 1.3")
 * Version for CakePHP 2.0: [http://github.com/pedroelsner/filter_results/tree/2.0](http://github.com/pedroelsner/filter_results/tree/2.0 "FilterResults para CakePHP 2.0")
 
-# Changes to version 2.3
+# Changes in version 2.3
 
 * `FilterResultsComponent` was changed to `FilterComponent`;
 * `FilterFormHelper` was changed to `SearchHelper`;
