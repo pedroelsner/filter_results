@@ -12,8 +12,6 @@ Compatível com CakePHP 2.3 + Paginate (Component)
 
 * Componente `FilterResults` foi alterado para apenas `Filter`;
 * Helper `FilterForm` foi alterado para apenas `Search`;
-* Armazena em `Session` ultimo filtro utilizado e restaura na volta para a `Action`;
-* Operadores `IS NULL` e `NOT IS NULL` foram implementados;
 * Método `explode` disponível para qualquer combinação de filtros;
 * Reformulação na estrutura das funções;
 
