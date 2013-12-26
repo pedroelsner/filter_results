@@ -1,4 +1,4 @@
-# Filter Results
+﻿# Filter Results
 
 Plugin que gera `conditions` para métodos `find` no CakePHP 2.3+ a partir de um formulário de pesquisa.
 
@@ -444,3 +444,4 @@ Licenciado pela Creative Commons 3.0 (http://creativecommons.org/licenses/by/3.0
 * Vinícius Arantes (vinicius.big@gmail.com)
 * Francys Reymer (francys.reymer@gmail.com)
 * Geazi El-Hanã de Oliveira (geazi.oliveira@jacotei.com.br)
+* Kristian Tenfen (kristian.tenfen@gmail.com)

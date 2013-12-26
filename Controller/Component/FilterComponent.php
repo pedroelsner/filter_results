@@ -632,7 +632,11 @@ class FilterComponent extends Component {
                     break;
 
                 default:
-                    $condition += (is_array($value))
+
+                    /** Fix by: Kristian Tenfen 
+                     *  $condition += (is_array($value))
+                     */     
+                    $condition[] = (is_array($value))
                          ? $this->_makeConditions($key, $value)
                          : $this->_makeConditions($value);
                     break;
